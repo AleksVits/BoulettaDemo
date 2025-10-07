@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Каталог товарів — валютний курс, експорт, кошик</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#fff; --text:#16181d; --muted:#6b7280; --primary:#2563eb;
+  --border:#e5e7eb; --accent:#111827;
+}
+*{box-sizing:border-box}
+html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+body{margin:0;background:var(--bg);color:var(--text);font-size:clamp(14px,2.3vw,16px);line-height:1.5}
+img{max-width:100%;display:block}
+button{font:inherit}
+
+/* Header */
+header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);
+  padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:5}
+header h1{font-size:clamp(16px,4.5vw,20px);margin:0;font-weight:800;letter-spacing:.2px;white-space:nowrap}
+header .spacer{flex:1}
+.btn{appearance:none;border:1px solid var(--border);background:#fff;color:var(--accent);
+  padding:8px 12px;border-radius:12px;font-weight:650;cursor:pointer;line-height:1}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.icon{display:inline-flex;gap:8px;align-items:center}
+.btn:active{transform:translateY(1px)}
+
+/* Toolbars */
+.toolbar{display:grid;gap:10px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);
+  grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1100px){.toolbar{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.toolbar{grid-template-columns:1fr}}
+.label{font-size:12px;color:var(--muted)}
+.input,select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+
+/* Grid */
+.container{padding:14px;display:grid;gap:14px;grid-template-columns:repeat(4,1fr)}
+@media(max-width:1200px){.container{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:860px){.container{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.container{grid-template-columns:1fr;padding:12px}}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  display:flex;flex-direction:column;box-shadow:0 6px 20px rgba(17,24,39,.06)}
+.card .body{padding:12px}
+.card .name{font-weight:800;margin:0 0 4px;font-size:clamp(14px,4vw,16px);
+  line-height:1.25;word-break:break-word}
+.card .barcode{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;
+  padding:4px 10px;font-size:12px;background:#fafafa;white-space:nowrap}
+.price{display:flex;gap:6px;flex-wrap:wrap}
+.pill{
+  font-size: clamp(14px, 2.8vw, 18px);
+  padding: 8px 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .1px;
+}
+.pill.opt{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
+.pill.retail{background:#eef2ff;color:#3730a3;border-color:#c7d2fe}
+.card .footer{margin-top:auto;padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:10px}
+
+/* --- Price blocks --- */
+.prices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:8px;
+}
+@media(max-width:560px){
+  .prices{ grid-template-columns:1fr; }
+}
+
+.price-block{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+  background:#fafbff;
+}
+.retail-block{ background:#eef2ff; }    /* легкий відтінок для роздрібу */
+.wholesale-block{ background:#ecfdf5; } /* легкий відтінок для опту   */
+
+.price-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--accent);
+  letter-spacing:.2px;
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+
+.price-row{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.price-hint{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* підправимо “пігулки”, щоб читались краще у боксах */
+.pill{
+  background:#fff;
+  border-color:#e6e8ef;
+}
+.pill.retail{ background:#fff; }
+.pill.opt{ background:#fff; }
+/* Slider */
+
+./* Slider */
+.card .media{
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background:#eef1f5;
+  overflow: hidden;
+}
+
+.slider{
+  position:relative;
+  /* важливо: фіксуємо висоту через aspect-ratio і не даємо внутрішнім елементам змінювати її */
+  aspect-ratio: 4 / 3;
+}
+
+.slides{
+  display:flex;
+  height:100%;                 /* було без висоти */
+  transition:transform .3s ease;
+}
+
+.slide{
+  min-width:100%;
+  height:100%;                 /* прибрали "height:0; padding-bottom:75%" */
+  position:relative;
+}
+
+.slide img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;          /* було cover — тепер зображення не обрізається */
+  background:#f2f4f7;          /* акуратний фон для «порожніх» полів */
+}
+
+
+/* ========== New arrows (edge chevrons) ========== */
+/* Крайові шеврони — В ЦЕНТРІ */
+.nav-btn{
+  position:absolute;
+  top:50%;                    /* ключ: центруємо по вертикалі */
+  transform: translateY(-50%);
+  bottom:auto;                /* прибрано розтяг на всю висоту */
+  height:56px;                /* висота клікабельної зони */
+  width:44px;
+  border:0;
+  background:transparent;     /* фон прозорий, підсвітимо градієнтом в :before */
+  cursor:pointer;
+  padding:0;
+  display:grid;
+  place-items:center;
+  transition:opacity .2s ease, filter .2s ease;
+  color:transparent; font-size:0; line-height:0; /* приховуємо текст */
+}
+.nav-btn:disabled{ opacity:.35; pointer-events:none; }
+.nav-prev{ left:0; }
+.nav-next{ right:0; }
+
+/* Легка крайова вуаль для читабельності стрілок */
+.nav-btn::after{
+  content:"";
+  position:absolute; inset:0;
+  background:linear-gradient(to right, rgba(0,0,0,.22), transparent);
+  pointer-events:none;
+  opacity:.8;
+}
+.nav-next::after{
+  background:linear-gradient(to left, rgba(0,0,0,.22), transparent);
+}
+
+/* сам шеврон */
+.nav-btn::before{
+  content:"";
+  width:12px; height:12px;
+  border-top:3px solid rgba(255,255,255,.95);
+  border-right:3px solid rgba(255,255,255,.95);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+  transition: transform .15s ease;
+  z-index:1;
+}
+.nav-prev::before{ transform: rotate(-135deg); }
+.nav-next::before{ transform: rotate(45deg); }
+
+/* ховер/фокус */
+.nav-btn:hover{ filter: brightness(1.05); }
+.nav-btn:focus-visible{
+  outline:2px solid #fff; outline-offset: 2px; border-radius:8px;
+}
+
+/* Mobile — трохи компактніше, але все ще по центру */
+@media (max-width:560px){
+  .nav-btn{ height:48px; width:36px; }
+  .nav-btn::before{ width:10px; height:10px; border-width:2.5px; }
+}
+
+/* Status */
+.status{padding:0 16px 10px;color:var(--muted);font-size:13px}
+
+/* Cart */
+#cart{position:fixed;top:0;right:-420px;width:380px;max-width:96vw;height:100vh;background:#fff;border-left:1px solid var(--border);
+  box-shadow:-8px 0 30px rgba(0,0,0,.08);transition:right .25s;display:flex;flex-direction:column;z-index:10}
+#cart.open{right:0}
+#cart .head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#cart .body{padding:10px 12px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.cart-item{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;border:1px solid var(--border);
+  border-radius:12px;padding:8px}
+.cart-item img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+.meta{font-size:12px;color:var(--muted)}
+.qty{display:inline-flex;align-items:center;gap:6px;margin-top:6px}
+.qty input{width:48px;text-align:center;padding:6px;border:1px solid var(--border);border-radius:8px}
+#cart .foot{padding:12px;border-top:1px solid var(--border)}
+#cart .row{display:flex;justify-content:space-between;margin:6px 0}
+.rem{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
+small.muted{color:var(--muted);font-size:12px}
+
+/* ===== Cart text wrapping & safety ===== */
+.cart-item .title{
+  font-weight:700;
+  font-size:14px;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.cart-item .meta{
+  font-size:12px;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+.cart-item > div:nth-child(2){ /* колонка з текстом */
+  min-width:0;           /* дає елементам право стискатися */
+}
+
+/* сума справа теж не ламає верстку */
+.cart-item > div:last-child{
+  white-space:nowrap;
+}
+
+/* ===== Cart button bump animation ===== */
+@keyframes cart-bump {
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.08); }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+#cartBtn.bump{
+  animation: cart-bump 480ms ease;
+}
+
+/* ===== Fly-to-cart thumbnail ===== */
+.fly-thumb{
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  width: 80px; height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform .7s cubic-bezier(.22,.8,.3,1), opacity .7s ease;
+  opacity: 1;
+}
+
+/* Mobile polish */
+@media(max-width:560px){
+  .badge,.pill{padding:5px 8px;font-size:11px}
+  .card .footer .btn{width:100%;justify-content:center}
+  .barcode{font-size:11px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Каталог товарів</h1>
+  <div class="spacer"></div>
+  <button class="btn icon" id="resetBtn">Скинути</button>
+  <button class="btn icon" id="cartBtn">Кошик (<span id="cartCount">0</span>)</button>
+</header>
+
+<section class="toolbar">
+  <div>
+    <div class="label">Тип товару</div>
+    <select id="typeSel" class="input"><option value="">Всі</option></select>
+  </div>
+  <div>
+    <div class="label">Колір</div>
+    <select id="colorSel" class="input"><option value="">Всі</option></select>
+  </div>
+  <div>
+    <div class="label">Сортування</div>
+    <select id="sort" class="input">
+      <option value="name-asc">Назва (А→Я)</option>
+      <option value="name-desc">Назва (Я→А)</option>
+      <option value="retailUAH-asc">Роздріб UAH ↑</option>
+      <option value="retailUAH-desc">Роздріб UAH ↓</option>
+      <option value="wholesaleUAH-asc">Опт UAH ↑</option>
+      <option value="wholesaleUAH-desc">Опт UAH ↓</option>
+    </select>
+  </div>
+</section>
+
+<section class="toolbar" style="border-top:0">
+  <div>
+    <div class="label">Курс USD → UAH</div>
+    <div class="row">
+      <input id="rateInput" class="input" inputmode="decimal" placeholder="Напр.: 41.00" style="max-width:150px" />
+      <button class="btn" id="btnUpdateRate">Оновити (НБУ)</button>
+    </div>
+    <small class="muted" id="rateInfo">Поточний курс: 41.00</small>
+  </div>
+  <div>
+    <div class="label">Експорт</div>
+    <div class="row">
+      <button class="btn" id="exportXLSX">Excel</button>
+    </div>
+    <small class="muted">Експорт поточно відфільтрованих товарів</small>
+  </div>
+</section>
+
+<div class="status" id="status"></div>
+<section class="container" id="grid"></section>
+
+<aside id="cart">
+  <div class="head">
+    <strong style="font-size:14px">Ваш кошик</strong>
+    <div class="spacer"></div>
+    <button class="btn" id="closeCart">✕</button>
+  </div>
+  <div class="body" id="cartList"></div>
+  <div class="foot">
+    <div class="row"><span>Разом</span><b id="cartTotal">0 грн • $0</b></div>
+    <div class="row" style="gap:8px">
+      <button class="btn rem" id="cartClear">Очистити</button>
+      <div class="spacer"></div>
+      <button class="btn primary" id="checkoutBtn">Оформити</button>
+    </div>
+  </div>
+</aside>
+
+<template id="cardTpl">
+  <article class="card">
+    <div class="media">
+      <div class="slider">
+        <div class="slides"></div>
+        <button class="nav-btn nav-prev" aria-label="Попереднє">‹</button>
+        <button class="nav-btn nav-next" aria-label="Наступне">›</button>
+        <div class="dots"></div>
+      </div>
+    </div>
+    <div class="body">
+      <h3 class="name"></h3>
+      <div class="barcode"></div>
+      <div class="meta">
+        <span class="type badge"></span>
+        <span class="color badge"></span>
+      </div>
+<div class="prices">
+  <div class="price-block retail-block">
+    <div class="price-title">Роздріб</div>
+    <div class="price-row">
+      <span class="pill retail"></span>
+      <span class="pill retailUSD"></span>
+    </div>
+  </div>
+
+  <div class="price-block wholesale-block">
+    <div class="price-title">Опт</div>
+    <div class="price-row">
+      <span class="pill opt"></span>
+      <span class="pill optUSD"></span>
+    </div>
+  </div>
+</div>
+
+<div class="price-hint">* Оптова ціна діє від 10&nbsp;од. одного типу товару</div>
+    </div>
+    <div class="footer">
+      <button class="btn primary add">У кошик</button>
+    </div>
+  </article>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* ========= Data ========= */
+const DEFAULT_IMG = 'https://placehold.co/800x600/png?text=Фото';
+let products = [
+  {
+    imgs:[
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-1152132780.jpg?v=1745582226&width=800',
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-72961292173699.jpg?v=1737845537&width=800',
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-72961292468611.jpg?v=1737845540&width=800',
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-72961291846019.jpg?v=1737854546&width=800'
+    ],
+    name:'Blake Leather Crossbody Bag',
+    barcode:'8691051960607',
+    type:'Рюкзак',
+    color:'Помаранчевий',
+    retailUAH:7579.15, retailUSD:183.96, wholesaleUAH:3989.03, wholesaleUSD:96.79
+  },
+  {
+    imgs:[
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-1152132784.jpg?v=1745582337&width=800',
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-1152132781.jpg?v=1745582229&width=800',
+      'https://shop.bouletta.com/cdn/shop/files/blake-leather-crossbody-bag-1152132787.jpg?v=1745582346&width=800'
+    ],
+    name:'Blake Leather Crossbody Bag',
+    barcode:'8691051960608',
+    type:'Рюкзак',
+    color:'Сірий',
+    retailUAH:7579.15, retailUSD:183.96, wholesaleUAH:3989.03, wholesaleUSD:96.79
+  },
+  {
+    imgs:[
+      'https://shop.bouletta.com/cdn/shop/files/pisa-genuine-leather-crossbody-bag-70873571787139.jpg?v=1735256421&width=800'
+    ],
+    name:'Pisa Leather Crossbody Bag',
+    barcode:'8691051960614',
+    type:'Сумка через плече',
+    color:'Чорний',
+    retailUAH:4075.09, retailUSD:98.90, wholesaleUAH:2144.79, wholesaleUSD:52.04
+  },
+  {
+    imgs:[
+      'https://shop.bouletta.com/cdn/shop/files/Alora_Leather_Crossbody_Bag_crocodile_brown_1d228af2-bdab-4412-9ee6-9d7666f25203.jpg?v=1759831404&width=800'
+    ],
+    name:'Synera Leather Crossbody Bag',
+    barcode:'8691051960621',
+    type:'Сумка через плече',
+    color:'Античний коричневий',
+    retailUAH:4010.72, retailUSD:97.35, wholesaleUAH:2110.90, wholesaleUSD:51.21
+  },
+  {
+    imgs:[
+      'https://shop.bouletta.com/cdn/shop/files/multibox-leather-pencil-case-72795016692099.jpg?v=1740446183&width=800'
+    ],
+    name:'Multibox Leather Case',
+    barcode:'8691051960638',
+    type:'Пенал',
+    color:'Жовтий',
+    retailUAH:1272.88, retailUSD:30.85, wholesaleUAH:669.94, wholesaleUSD:16.22
+  },
+];
+let USD_UAH_RATE = parseFloat(localStorage.getItem('USD_UAH_RATE')||'41') || 41;
+
+/* ========= DOM refs ========= */
+const grid = document.getElementById('grid');
+const tpl  = document.getElementById('cardTpl');
+const typeSel = document.getElementById('typeSel');
+const colorSel = document.getElementById('colorSel');
+const sortSel  = document.getElementById('sort');
+const status   = document.getElementById('status');
+const rateInput = document.getElementById('rateInput');
+const rateInfo  = document.getElementById('rateInfo');
+
+/* ========= Utils ========= */
+function number(v){ const n = parseFloat(String(v).replace(/\s|\u00A0/g,'').replace(',','.')); return Number.isFinite(n)?n:null }
+function format(n){ return new Intl.NumberFormat('uk-UA').format(n) }
+
+/* ========= Filters ========= */
+function buildOptions(){
+  const prevType = typeSel.value; const prevColor = colorSel.value;
+  const types  = Array.from(new Set(products.map(p=>p.type).filter(Boolean))).sort();
+  const colors = Array.from(new Set(products.map(p=>p.color).filter(Boolean))).sort();
+  typeSel.innerHTML = ''; colorSel.innerHTML='';
+  const o1=document.createElement('option');o1.value='';o1.textContent='Всі';typeSel.appendChild(o1);
+  types.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;typeSel.appendChild(o);});
+  const o2=document.createElement('option');o2.value='';o2.textContent='Всі';colorSel.appendChild(o2);
+  colors.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;colorSel.appendChild(o);});
+  typeSel.value=prevType;colorSel.value=prevColor;
+}
+
+function applyFilters(){
+  const type = typeSel.value; const color = colorSel.value;
+  let list = products.filter(p=> (!type || p.type===type) && (!color || p.color===color));
+  switch(sortSel.value){
+    case 'name-asc': list.sort((a,b)=>a.name.localeCompare(b.name)); break;
+    case 'name-desc': list.sort((a,b)=>b.name.localeCompare(a.name)); break;
+    case 'retailUAH-asc': list.sort((a,b)=>a.retailUAH-b.retailUAH); break;
+    case 'retailUAH-desc': list.sort((a,b)=>b.retailUAH-a.retailUAH); break;
+    case 'wholesaleUAH-asc': list.sort((a,b)=>a.wholesaleUAH-b.wholesaleUAH); break;
+    case 'wholesaleUAH-desc': list.sort((a,b)=>b.wholesaleUAH-a.wholesaleUAH); break;
+  }
+  return list;
+}
+
+/* ========= Slider per-card ========= */
+function initSlider(root, imgs){
+  const slidesWrap = root.querySelector('.slides');
+  const prevBtn = root.querySelector('.nav-prev');
+  const nextBtn = root.querySelector('.nav-next');
+  const dotsBox = root.querySelector('.dots');
+
+  const urls = (imgs && imgs.length ? imgs : [DEFAULT_IMG]).map(u=>u||DEFAULT_IMG);
+  slidesWrap.innerHTML=''; dotsBox.innerHTML='';
+  urls.forEach((src,idx)=>{
+    const s = document.createElement('div'); s.className='slide';
+    const im = document.createElement('img'); im.src=src; im.alt='Фото товару'; im.onerror=()=>{im.src=DEFAULT_IMG};
+    s.appendChild(im); slidesWrap.appendChild(s);
+    const d = document.createElement('div'); d.className='dot'; if(idx===0) d.classList.add('active');
+    d.dataset.idx = idx; dotsBox.appendChild(d);
+  });
+
+  let i = 0, max = urls.length-1;
+  function update(){ slidesWrap.style.transform = `translateX(-${i*100}%)`;
+    dotsBox.querySelectorAll('.dot').forEach((d,di)=>d.classList.toggle('active', di===i));
+    prevBtn.disabled = i===0; nextBtn.disabled = i===max;
+  }
+  prevBtn.onclick = ()=>{ if(i>0){ i--; update(); } };
+  nextBtn.onclick = ()=>{ if(i<max){ i++; update(); } };
+  dotsBox.addEventListener('click', e=>{
+    const dot = e.target.closest('.dot'); if(!dot) return;
+    i = +dot.dataset.idx; update();
+  });
+
+  // Touch swipe
+  let startX=0, dx=0, touching=false;
+  slidesWrap.addEventListener('touchstart', (e)=>{ touching=true; startX = e.touches[0].clientX; dx=0; }, {passive:true});
+  slidesWrap.addEventListener('touchmove', (e)=>{ if(!touching) return; dx = e.touches[0].clientX - startX; }, {passive:true});
+  slidesWrap.addEventListener('touchend', ()=>{
+    if(Math.abs(dx)>40){ if(dx<0 && i<max) i++; if(dx>0 && i>0) i--; update(); }
+    touching=false; dx=0;
+  });
+
+  update();
+}
+
+/* ========= Render ========= */
+function renderCards(list){
+  grid.innerHTML='';
+  const frag = document.createDocumentFragment();
+  for(const p of list){
+    const node = tpl.content.cloneNode(true);
+    // Slider images
+    initSlider(node.querySelector('.slider'), p.imgs || (p.img ? [p.img] : []));
+    node.querySelector('.name').textContent = p.name;
+    node.querySelector('.barcode').textContent = `Штрих-код: ${p.barcode||'—'}`;
+    node.querySelector('.type').textContent = p.type || '—';
+    node.querySelector('.color').textContent = p.color || '—';
+    node.querySelector('.retail').textContent = `${format(p.retailUAH)} грн`;
+    node.querySelector('.retailUSD').textContent = `${format(p.retailUSD)} USD`;
+    node.querySelector('.opt').textContent = `${format(p.wholesaleUAH)} грн`;
+    node.querySelector('.optUSD').textContent = `${format(p.wholesaleUSD)} USD`;
+    const addBtn = node.querySelector('.add');
+    addBtn.dataset.code = p.barcode||p.name;
+    frag.appendChild(node);
+  }
+  grid.appendChild(frag);
+}
+
+function render(){ const list = applyFilters(); renderCards(list); status.textContent = 'Знайдено товарів: '+list.length; }
+
+/* ========= Cart ========= */
+let cart = [];
+function saveCart(){ localStorage.setItem('cart_demo', JSON.stringify(cart)); }
+function loadCart(){ try{ cart = JSON.parse(localStorage.getItem('cart_demo')||'[]'); }catch{ cart=[]; } }
+function productByCode(code){ return products.find(p=> (p.barcode||p.name)===code) }
+function addToCart(code, sourceImgEl){
+  const p = productByCode(code); if(!p) return;
+  const it = cart.find(x=>x.code===code);
+  if(it) it.qty++; else cart.push({ code, qty:1 });
+  updateCart();
+  // НЕ відкриваємо кошик, а запускаємо анімацію
+  flyToCart(sourceImgEl);
+}
+function setQty(code, qty){ qty=Math.max(1, qty|0); const it=cart.find(x=>x.code===code); if(!it) return; it.qty=qty; updateCart(); }
+function inc(code){ const it=cart.find(x=>x.code===code); if(!it) return; it.qty++; updateCart(); }
+function dec(code){ const it=cart.find(x=>x.code===code); if(!it) return; it.qty=Math.max(1,it.qty-1); updateCart(); }
+function removeItem(code){ cart = cart.filter(x=>x.code!==code); updateCart(); }
+function computeTotals(cartArg, productsArg){
+  const typeCounts = cartArg.reduce((m,it)=>{ const p = productsArg.find(pp=> (pp.barcode||pp.name)===it.code); if(!p) return m; m[p.type] = (m[p.type]||0) + it.qty; return m; },{});
+  let uah=0, usd=0;
+  for(const it of cartArg){
+    const p = productsArg.find(pp=> (pp.barcode||pp.name)===it.code); if(!p) continue;
+    const wholesale = (typeCounts[p.type]||0) >= 10;
+    const unitUAH = wholesale ? (p.wholesaleUAH||0) : (p.retailUAH||0);
+    const unitUSD = wholesale ? (p.wholesaleUSD||0) : (p.retailUSD||0);
+    uah += unitUAH * it.qty; usd += unitUSD * it.qty;
+  }
+  return { uah, usd };
+}
+function totalBoth(){ return computeTotals(cart, products); }
+function setCartCount(n){ const el = document.getElementById('cartCount'); if(el) el.textContent = n; }
+function updateCart(){
+  const cartList  = document.getElementById('cartList');
+  const cartTotal = document.getElementById('cartTotal');
+  const typeCounts = cart.reduce((m,it)=>{ const p=productByCode(it.code); if(!p) return m; m[p.type]=(m[p.type]||0)+it.qty; return m; },{});
+  cartList.innerHTML='';
+  for(const it of cart){
+    const p = productByCode(it.code); if(!p) continue;
+    const useWholesale = (typeCounts[p.type]||0) >= 10;
+    const unitUAH = useWholesale ? (p.wholesaleUAH||0) : (p.retailUAH||0);
+    const unitUSD = useWholesale ? (p.wholesaleUSD||0) : (p.retailUSD||0);
+    const modeLabel = useWholesale ? 'опт' : 'роздріб';
+    const row = document.createElement('div'); row.className='cart-item'; row.innerHTML = `
+      <img src="${(p.imgs && p.imgs[0])||DEFAULT_IMG}" alt="${p.name}">
+      <div>
+        <div><b>${p.name}</b></div>
+        <div class="meta">Штрих-код: ${p.barcode||'—'} • ${p.color||'—'} • ${p.type||'—'}</div>
+        <div class="meta">${format(unitUAH)} грн / шт (${modeLabel}) • $${format(unitUSD)} / шт (${modeLabel})</div>
+        <div class="qty">
+          <button class="btn" data-act="dec" data-code="${p.barcode||p.name}">−</button>
+          <input type="number" min="1" value="${it.qty}" data-code="${p.barcode||p.name}" />
+          <button class="btn" data-act="inc" data-code="${p.barcode||p.name}">+</button>
+          <button class="btn rem" style="margin-left:6px" data-act="rem" data-code="${p.barcode||p.name}">Прибрати</button>
+        </div>
+      </div>
+      <div><b>${format(unitUAH*it.qty)} грн • $${format(unitUSD*it.qty)}</b></div>`;
+    cartList.appendChild(row);
+  }
+  const totals = totalBoth();
+  cartTotal.textContent = `${format(totals.uah)} грн • $${format(totals.usd)}`;
+  setCartCount(cart.reduce((s,i)=>s+i.qty,0));
+  saveCart();
+}
+function openCart(){ document.getElementById('cart').classList.add('open') }
+function closeCartDrawer(){ document.getElementById('cart').classList.remove('open') }
+
+/* ========= Rate (NBU) ========= */
+async function updateRateFromNBU(){
+  try{
+    const res = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&json');
+    const data = await res.json(); const rate = Number(data?.[0]?.rate);
+    if(Number.isFinite(rate)){
+      USD_UAH_RATE = rate;
+      localStorage.setItem('USD_UAH_RATE', String(rate));
+      rateInput.value = String(rate.toFixed(2));
+      rateInfo.textContent = `Курс НБУ: ${rate.toFixed(2)}`;
+    }
+  }catch{ rateInfo.textContent = 'Не вдалося отримати курс НБУ'; }
+}
+
+/* ========= Export ========= */
+function currentFiltered(){ return applyFilters(); }
+<!--function exportCSV(){-->
+<!--  const list = currentFiltered().map(p=>({name:p.name,barcode:p.barcode,type:p.type,color:p.color,retailUAH:p.retailUAH,retailUSD:p.retailUSD,wholesaleUAH:p.wholesaleUAH,wholesaleUSD:p.wholesaleUSD,img:(p.imgs&&p.imgs[0])||''}));-->
+<!--  const headers = Object.keys(list[0]||{});-->
+<!--  const lines = [headers.join(',')].concat(list.map(p=> headers.map(h=>`"${String(p[h]??'').replace(/"/g,'""')}"`).join(',')));-->
+<!--  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});-->
+<!--  const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='products_filtered.csv'; a.click(); URL.revokeObjectURL(url);-->
+<!--}-->
+function exportXLSX(){
+  const list = currentFiltered().map(p=>({name:p.name,barcode:p.barcode,type:p.type,color:p.color,retailUAH:p.retailUAH,retailUSD:p.retailUSD,wholesaleUAH:p.wholesaleUAH,wholesaleUSD:p.wholesaleUSD,img:(p.imgs&&p.imgs[0])||''}));
+  const ws = XLSX.utils.json_to_sheet(list); const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Products'); XLSX.writeFile(wb, 'products_filtered.xlsx');
+}
+function exportCartAsXLSX(){
+  if(!cart.length){ alert('Кошик порожній'); return; }
+  const typeCounts = cart.reduce((m,it)=>{ const p=productByCode(it.code); if(!p) return m; m[p.type]=(m[p.type]||0)+it.qty; return m; },{});
+  const rows = cart.map(it=>{
+    const p = productByCode(it.code); if(!p) return null;
+    const useWholesale = (typeCounts[p.type]||0) >= 10;
+    const unitUAH = useWholesale ? (p.wholesaleUAH||0) : (p.retailUAH||0);
+    const unitUSD = useWholesale ? (p.wholesaleUSD||0) : (p.retailUSD||0);
+    return {
+      name: p.name, barcode: p.barcode||'', type: p.type||'', color: p.color||'',
+      qty: it.qty, price_mode: useWholesale ? 'wholesale' : 'retail',
+      unit_price_UAH: Number(unitUAH.toFixed(2)), unit_price_USD: Number(unitUSD.toFixed(2)),
+      line_total_UAH: Number((unitUAH*it.qty).toFixed(2)), line_total_USD: Number((unitUSD*it.qty).toFixed(2)),
+      image: (p.imgs&&p.imgs[0])||''
+    };
+  }).filter(Boolean);
+  const totals = totalBoth();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.sheet_add_aoa(ws, [['','','','','','TOTAL','','', Number(totals.uah.toFixed(2)), Number(totals.usd.toFixed(2))]], {origin:-1});
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Order');
+  const d = new Date();
+  const fname = `order_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.xlsx`;
+  XLSX.writeFile(wb, fname);
+}
+
+/* ========= Events ========= */
+// знайдемо кнопку кошика 1 раз
+const cartBtnEl = document.getElementById('cartBtn');
+
+function bumpCartButton(){
+  cartBtnEl.classList.remove('bump');
+  // перезапуск анімації
+  void cartBtnEl.offsetWidth;
+  cartBtnEl.classList.add('bump');
+}
+
+function flyToCart(fromImgEl){
+  try{
+    if(!fromImgEl) return bumpCartButton();
+    const rectStart = fromImgEl.getBoundingClientRect();
+    const rectEnd   = cartBtnEl.getBoundingClientRect();
+
+    const thumb = document.createElement('div');
+    thumb.className = 'fly-thumb';
+    thumb.style.left = (rectStart.left + rectStart.width/2) + 'px';
+    thumb.style.top  = (rectStart.top + rectStart.height/2) + 'px';
+
+    const img = document.createElement('img');
+    img.src = fromImgEl.src;
+    img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover';
+    thumb.appendChild(img);
+    document.body.appendChild(thumb);
+
+    const dx = (rectEnd.left + rectEnd.width/2) - (rectStart.left + rectStart.width/2);
+    const dy = (rectEnd.top  + rectEnd.height/2) - (rectStart.top  + rectStart.height/2);
+
+    requestAnimationFrame(()=>{
+      thumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.2)`;
+      thumb.style.opacity = '0';
+    });
+
+    setTimeout(()=>{ thumb.remove(); bumpCartButton(); }, 750);
+  }catch{ bumpCartButton(); }
+}
+
+typeSel.addEventListener('change', render);
+colorSel.addEventListener('change', render);
+sortSel.addEventListener('change', render);
+document.getElementById('resetBtn').addEventListener('click', ()=>{ typeSel.value=''; colorSel.value=''; sortSel.value='name-asc'; render(); });
+document.getElementById('cartBtn').addEventListener('click', ()=>openCart());
+document.getElementById('closeCart').addEventListener('click', ()=>closeCartDrawer());
+document.getElementById('cartClear').addEventListener('click', ()=>{ cart=[]; updateCart(); });
+document.getElementById('checkoutBtn').addEventListener('click', exportCartAsXLSX);
+document.getElementById('exportXLSX').addEventListener('click', exportXLSX);
+rateInput.addEventListener('change', ()=>{ const v = number(rateInput.value); if(v){ USD_UAH_RATE = v; localStorage.setItem('USD_UAH_RATE', String(v)); rateInfo.textContent = `Поточний курс: ${v.toFixed(2)}`; }});
+document.getElementById('btnUpdateRate').addEventListener('click', updateRateFromNBU);
+
+grid.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.add');
+  if(!btn) return;
+  // знаходимо картинку в тій же картці
+  const card = btn.closest('.card');
+  const imgEl = card?.querySelector('.slide img') || card?.querySelector('img');
+  addToCart(btn.dataset.code, imgEl);
+});
+document.getElementById('cartList').addEventListener('click', (e)=>{
+  const code = e.target.dataset.code; if(!code) return;
+  if(e.target.dataset.act==='inc') inc(code);
+  if(e.target.dataset.act==='dec') dec(code);
+  if(e.target.dataset.act==='rem') removeItem(code);
+});
+document.getElementById('cartList').addEventListener('change', (e)=>{
+  if(e.target.matches('input[type=number]')){ const code = e.target.dataset.code; const qty = parseInt(e.target.value,10)||1; setQty(code, qty); }
+});
+
+/* ========= Tests ========= */
+(function runTests(){
+  const approx = (a,b,eps=1e-6)=> Math.abs(a-b) < eps;
+  const cartBackup = JSON.parse(JSON.stringify(cart));
+  try {
+    const testCart1 = [{code: products[0].barcode, qty: 2}];
+    const t1 = computeTotals(testCart1, products);
+    console.assert(approx(t1.uah, products[0].retailUAH*2), 'Test1 UAH retail failed');
+    console.assert(approx(t1.usd, products[0].retailUSD*2), 'Test1 USD retail failed');
+
+    const testCart2 = [{code: products[1].barcode, qty: 6},{code: products[2].barcode, qty: 4}];
+    const t2 = computeTotals(testCart2, products);
+    const expectedUAH2 = products[1].wholesaleUAH*6 + products[2].wholesaleUAH*4;
+    const expectedUSD2 = products[1].wholesaleUSD*6 + products[2].wholesaleUSD*4;
+    console.assert(approx(t2.uah, expectedUAH2), 'Test2 UAH wholesale failed');
+    console.assert(approx(t2.usd, expectedUSD2), 'Test2 USD wholesale failed');
+
+    const testCart3 = [{code: products[1].barcode, qty: 6},{code: products[2].barcode, qty: 4},{code: products[3].barcode, qty: 3}];
+    const t3 = computeTotals(testCart3, products);
+    const expectedUAH3 = expectedUAH2 + products[3].retailUAH*3;
+    const expectedUSD3 = expectedUSD2 + products[3].retailUSD*3;
+    console.assert(approx(t3.uah, expectedUAH3), 'Test3 UAH mixed failed');
+    console.assert(approx(t3.usd, expectedUSD3), 'Test3 USD mixed failed');
+
+    console.log('%c✅ All cart pricing tests passed','color:green;font-weight:bold');
+  } catch(err){ console.error('❌ Tests failed', err); }
+  finally { cart = cartBackup; }
+})();
+
+/* ========= Init ========= */
+window.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    rateInput.value = String(USD_UAH_RATE.toFixed(2));
+    rateInfo.textContent = `Поточний курс: ${USD_UAH_RATE.toFixed(2)}`;
+    buildOptions(); loadCart(); render(); updateCart();
+  }catch(err){
+    console.error('Init error:', err);
+    grid.innerHTML ='<div style="padding:16px;color:#b91c1c">Помилка ініціалізації: '+(err?.message||err)+'</div>';
+  }
+});
+</script>
+</body>
+</html>
