@@ -25,6 +25,47 @@ header .spacer{flex:1}
 .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
 .btn.icon{display:inline-flex;gap:8px;align-items:center}
 .btn:active{transform:translateY(1px)}
+/* --- Адаптація хедера під мобільні пристрої --- */
+@media (max-width: 560px) {
+  header {
+    flex-wrap: wrap;           /* дозволяємо перенос елементів */
+    gap: 8px;                  /* відступи між ними */
+  }
+
+  header .spacer {
+    display: none;             /* розпірка не потрібна на мобільному */
+  }
+
+  header h1 {
+    flex: 1 1 100%;            /* заголовок на окремому рядку */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;   /* обрізання довгого тексту */
+    text-align: center;
+  }
+
+  header .btn {
+    min-width: 0;              /* дозволяємо кнопкам стискатись */
+    flex: 1 1 auto;
+    justify-content: center;   /* центруємо контент у кнопці */
+  }
+
+  #cartBtn {
+    width: auto;
+    max-width: 90%;            /* не виходить за межі екрана */
+    margin: 0 auto;
+    display: block;
+  }
+}
+
+/* --- Для дуже вузьких екранів (до 360px) --- */
+@media (max-width: 360px) {
+  #cartBtn {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
 
 /* Toolbars */
 .toolbar{display:grid;gap:10px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);
@@ -111,7 +152,40 @@ header .spacer{flex:1}
 }
 .pill.retail{ background:#fff; }
 .pill.opt{ background:#fff; }
-/* Slider */
+
+/* Компактніші ціни в боксах */
+.prices .pill{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  font-size: clamp(12px, 2.2vw, 14px);
+  line-height: 1.15;
+}
+
+/* трішки дрібніші заголовки блоків і самі бокси */
+.prices{
+  gap: 8px;
+}
+.price-block{
+  padding: 8px;
+}
+.price-title{
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.price-hint{
+  font-size: 11px;
+}
+
+/* додатково – для дуже маленьких екранів */
+@media (max-width: 360px){
+  .prices .pill{
+    font-size: 12px;
+    padding: 5px 7px;
+  }
+  .price-title{ font-size: 11px; }
+}
 
 ./* Slider */
 .card .media{
@@ -1923,36 +1997,53 @@ function inc(code){ const it=cart.find(x=>x.code===code); if(!it) return; it.qty
 function dec(code){ const it=cart.find(x=>x.code===code); if(!it) return; it.qty=Math.max(1,it.qty-1); updateCart(); }
 function removeItem(code){ cart = cart.filter(x=>x.code!==code); updateCart(); }
 function computeTotals(cartArg, productsArg){
-  const typeCounts = cartArg.reduce((m,it)=>{ const p = productsArg.find(pp=> (pp.barcode||pp.name)===it.code); if(!p) return m; m[p.type] = (m[p.type]||0) + it.qty; return m; },{});
+  // 1) Calculate retail subtotal to check wholesale threshold in USD
+  let retailUAH=0, retailUSD=0;
+  for(const it of cartArg){
+    const p = productsArg.find(pp => (pp.barcode||pp.name) === it.code);
+    if(!p) continue;
+    retailUAH += (p.retailUAH||0) * it.qty;
+    retailUSD += (p.retailUSD||0) * it.qty;
+  }
+  // 2) If retail subtotal in USD exceeds $500, we use wholesale prices for ALL items
+  const useWholesaleForCart = retailUSD > 500;
   let uah=0, usd=0;
   for(const it of cartArg){
-    const p = productsArg.find(pp=> (pp.barcode||pp.name)===it.code); if(!p) continue;
-    const wholesale = (typeCounts[p.type]||0) >= 10;
-    const unitUAH = wholesale ? (p.wholesaleUAH||0) : (p.retailUAH||0);
-    const unitUSD = wholesale ? (p.wholesaleUSD||0) : (p.retailUSD||0);
-    uah += unitUAH * it.qty; usd += unitUSD * it.qty;
+    const p = productsArg.find(pp => (pp.barcode||pp.name) === it.code);
+    if(!p) continue;
+    const unitUAH = useWholesaleForCart ? (p.wholesaleUAH||0) : (p.retailUAH||0);
+    const unitUSD = useWholesaleForCart ? (p.wholesaleUSD||0) : (p.retailUSD||0);
+    uah += unitUAH * it.qty;
+    usd += unitUSD * it.qty;
   }
-  return { uah, usd };
+  return { uah, usd, useWholesaleForCart, retailUSD };
 }
 function totalBoth(){ return computeTotals(cart, products); }
 function setCartCount(n){ const el = document.getElementById('cartCount'); if(el) el.textContent = n; }
 function updateCart(){
   const cartList  = document.getElementById('cartList');
   const cartTotal = document.getElementById('cartTotal');
-  const typeCounts = cart.reduce((m,it)=>{ const p=productByCode(it.code); if(!p) return m; m[p.type]=(m[p.type]||0)+it.qty; return m; },{});
   cartList.innerHTML='';
+
+  // Get pricing mode based on $500 threshold (by retail subtotal)
+  const totalsProbe = computeTotals(cart, products);
+  const useWholesaleForCart = !!totalsProbe.useWholesaleForCart;
+  const modeLabel = useWholesaleForCart ? 'опт' : 'роздріб';
+
   for(const it of cart){
     const p = productByCode(it.code); if(!p) continue;
-    const useWholesale = (typeCounts[p.type]||0) >= 10;
-    const unitUAH = useWholesale ? (p.wholesaleUAH||0) : (p.retailUAH||0);
-    const unitUSD = useWholesale ? (p.wholesaleUSD||0) : (p.retailUSD||0);
-    const modeLabel = useWholesale ? 'опт' : 'роздріб';
-    const row = document.createElement('div'); row.className='cart-item'; row.innerHTML = `
+    const unitUAH = useWholesaleForCart ? (p.wholesaleUAH||0) : (p.retailUAH||0);
+    const unitUSD = useWholesaleForCart ? (p.wholesaleUSD||0) : (p.retailUSD||0);
+
+    const row = document.createElement('div');
+    row.className='cart-item';
+    row.innerHTML = `
       <img src="${(p.imgs && p.imgs[0])||DEFAULT_IMG}" alt="${p.name}">
       <div>
         <div><b>${p.name}</b></div>
         <div class="meta">Штрих-код: ${p.barcode||'—'} • ${p.color||'—'} • ${p.type||'—'}</div>
-        <div class="meta">${format(unitUAH)} грн / шт (${modeLabel}) • $${format(unitUSD)} / шт (${modeLabel})</div>
+        <div class="meta">Режим ціни: <span class="pill ${useWholesaleForCart?'opt':'retail'}">${modeLabel}</span></div>
+        <div class="meta">Ціна за одиницю: <b>${format(unitUAH)} грн • $${format(unitUSD)}</b></div>
         <div class="qty">
           <button class="btn" data-act="dec" data-code="${p.barcode||p.name}">−</button>
           <input type="number" min="1" value="${it.qty}" data-code="${p.barcode||p.name}" />
@@ -1963,10 +2054,22 @@ function updateCart(){
       <div><b>${format(unitUAH*it.qty)} грн • $${format(unitUSD*it.qty)}</b></div>`;
     cartList.appendChild(row);
   }
-  const totals = totalBoth();
+
+  const totals = computeTotals(cart, products);
   cartTotal.textContent = `${format(totals.uah)} грн • $${format(totals.usd)}`;
   setCartCount(cart.reduce((s,i)=>s+i.qty,0));
   saveCart();
+
+  // Optional: show a hint if close to threshold
+  const hint = document.getElementById('cartThresholdHint');
+  if(hint){
+    if(!useWholesaleForCart && totals.retailUSD && totals.retailUSD > 0){
+      const remaining = 500 - totals.retailUSD;
+      hint.textContent = remaining > 0 ? `Додайте ще $${format(remaining)} за роздрібними цінами, щоб активувати ОПТ.` : '';
+    } else {
+      hint.textContent = 'Застосовано ціни ОПТ на весь кошик (понад $500 за роздрібом).';
+    }
+  }
 }
 function openCart(){ document.getElementById('cart').classList.add('open') }
 function closeCartDrawer(){ document.getElementById('cart').classList.remove('open') }
