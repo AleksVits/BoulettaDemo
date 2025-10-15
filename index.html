@@ -22,7 +22,30 @@ header h1{font-size:clamp(16px,4.5vw,20px);margin:0;font-weight:800;letter-spaci
 header .spacer{flex:1}
 .btn{appearance:none;border:1px solid var(--border);background:#fff;color:var(--accent);
   padding:8px 12px;border-radius:12px;font-weight:650;cursor:pointer;line-height:1}
-.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+
+.btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+/* ефект наведення */
+.btn.primary:hover {
+  background: #1e4fd9; /* трохи темніший відтінок */
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ефект натискання */
+.btn.primary:active {
+  background: #1b46c7;
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
 .btn.icon{display:inline-flex;gap:8px;align-items:center}
 .btn:active{transform:translateY(1px)}
 /* --- Адаптація хедера під мобільні пристрої --- */
@@ -82,8 +105,23 @@ header .spacer{flex:1}
 @media(max-width:560px){.container{grid-template-columns:1fr;padding:12px}}
 
 /* Card */
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;
-  display:flex;flex-direction:column;box-shadow:0 6px 20px rgba(17,24,39,.06)}
+.card{
+  background:var(--card);
+  border: 0 solid transparent; /* невидима рамка в базовому стані */
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 6px 20px rgba(17,24,39,.06)
+  }
+
+.card:hover{
+  border-color: #e5e7eb;
+  transform: translateY(0px); /* плавніше і трохи вище */
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2); /* глибша, м’яка тінь */
+
+  }
+
 .card .body{padding:12px}
 .card .name{font-weight:800;margin:0 0 4px;font-size:clamp(14px,4vw,16px);
   line-height:1.25;word-break:break-word}
@@ -224,18 +262,33 @@ header .spacer{flex:1}
 
 .slider .slides::-webkit-scrollbar{ display:none; }
 
-.slider .dots{
-  position:absolute;
-  left:50%;
-  bottom:12px;
-  transform:translateX(-50%);
-  display:flex;
-  gap:8px;
-  align-items:center;
-  padding:6px 12px;
-  border-radius:999px;
-  background:rgba(17,24,39,.28);
-  backdrop-filter:blur(12px);
+.slider .dots {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.2); /* трохи прозоріше */
+  backdrop-filter: blur(10px);
+}
+
+/* стилі самих крапок */
+.slider .dots span {
+  width: 6px; /* менше */
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4); /* світла напівпрозора крапка */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* активна крапка */
+.slider .dots span.active {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.25);
 }
 
 .slider .dot{
@@ -544,6 +597,14 @@ body.cart-open #closeCart{
     </div>
   </article>
 </template>
+
+<footer style="background-color:#f9f9f9; text-align:left; padding:10px 20px; margin-top:40px; font-size:14px; color:#555; border-top:1px solid #e0e0e0;">
+  <p>© 2025 Усі права захищені. Розробник —
+    <a href="https://t.me/AleksVits" target="_blank" style="color:#2563eb; text-decoration:none; font-weight:500;">
+      @AleksVits
+    </a>
+  </p>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
