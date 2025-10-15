@@ -10,7 +10,7 @@
   --border:#e5e7eb; --accent:#111827;
 }
 *{box-sizing:border-box}
-html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+html{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font-size:clamp(14px,2.3vw,16px);line-height:1.5}
 img{max-width:100%;display:block}
 button{font:inherit}
@@ -187,7 +187,7 @@ header .spacer{flex:1}
   .price-title{ font-size: 11px; }
 }
 
-./* Slider */
+/* Slider */
 .card .media{
   position: relative;
   aspect-ratio: 4 / 3;
@@ -245,14 +245,16 @@ header .spacer{flex:1}
 .nav-prev{ left:0; }
 .nav-next{ right:0; }
 
-<!--/* Легка крайова вуаль для читабельності стрілок */-->
-<!--.nav-btn::after{-->
-<!--  content:"";-->
-<!--  position:absolute; inset:0;-->
-<!--  background:linear-gradient(to right, rgba(0,0,0,.22), transparent);-->
-<!--  pointer-events:none;-->
-<!--  opacity:.8;-->
-<!--}-->
+/* Легка крайова вуаль для читабельності стрілок */
+/*
+.nav-btn::after{
+  content:"";
+  position:absolute; inset:0;
+  background:linear-gradient(to right, rgba(0,0,0,.22), transparent);
+  pointer-events:none;
+  opacity:.8;
+}
+*/
 .nav-next::after{
   background:linear-gradient(to left, rgba(0,0,0,.22), transparent);
 }
