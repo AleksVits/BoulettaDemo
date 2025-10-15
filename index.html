@@ -199,12 +199,55 @@ header .spacer{flex:1}
   position:relative;
   /* важливо: фіксуємо висоту через aspect-ratio і не даємо внутрішнім елементам змінювати її */
   aspect-ratio: 4 / 3;
+  cursor: grab;
 }
 
-.slides{
+.slider.is-single{ cursor: default; }
+
+.slider .slides{
   display:flex;
   height:100%;                 /* було без висоти */
-  transition:transform .3s ease;
+  transition:transform .45s cubic-bezier(.22,.61,.36,1);
+  will-change:transform;
+  touch-action: pan-y;
+  user-select:none;
+}
+
+.slider.dragging{ cursor: grabbing; }
+.slider.dragging .slides{ transition:none !important; }
+
+.slider .dots{
+  position:absolute;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(17,24,39,.28);
+  backdrop-filter:blur(12px);
+}
+
+.slider .dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:rgba(255,255,255,.6);
+  opacity:.65;
+  transition:transform .2s ease, background .2s ease, opacity .2s ease;
+}
+
+.slider .dot.active{
+  opacity:1;
+  background:#fff;
+  transform:scale(1.35);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .slider{ cursor: default; }
+  .slider .slides{ transition:none !important; }
 }
 
 .slide{
@@ -2189,13 +2232,17 @@ function applyFilters(){
 
 /* ========= Slider per-card ========= */
 function initSlider(root, imgs){
+  if(!root) return;
+
   const slidesWrap = root.querySelector('.slides');
   const prevBtn = root.querySelector('.nav-prev');
   const nextBtn = root.querySelector('.nav-next');
   const dotsBox = root.querySelector('.dots');
+  if(!slidesWrap || !prevBtn || !nextBtn || !dotsBox) return;
 
   const urls = (imgs && imgs.length ? imgs : [DEFAULT_IMG]).map(u=>u||DEFAULT_IMG);
   slidesWrap.innerHTML=''; dotsBox.innerHTML='';
+
   urls.forEach((src,idx)=>{
     const s = document.createElement('div'); s.className='slide';
     const im = document.createElement('img'); im.src=src; im.alt='Фото товару'; im.onerror=()=>{im.src=DEFAULT_IMG};
@@ -2204,26 +2251,81 @@ function initSlider(root, imgs){
     d.dataset.idx = idx; dotsBox.appendChild(d);
   });
 
-  let i = 0, max = urls.length-1;
-  function update(){ slidesWrap.style.transform = `translateX(-${i*100}%)`;
+  slidesWrap.addEventListener('dragstart', e=>e.preventDefault());
+
+  const hasMultiple = urls.length > 1;
+  root.classList.toggle('is-single', !hasMultiple);
+  dotsBox.style.display = hasMultiple ? 'flex' : 'none';
+  prevBtn.style.display = nextBtn.style.display = hasMultiple ? '' : 'none';
+
+  let i = 0;
+  const max = urls.length - 1;
+  const THRESHOLD = 0.18;
+
+  const setPosition = percent => { slidesWrap.style.transform = `translateX(${percent}%)`; };
+
+  function update(){
+    setPosition(-i*100);
     dotsBox.querySelectorAll('.dot').forEach((d,di)=>d.classList.toggle('active', di===i));
-    prevBtn.disabled = i===0; nextBtn.disabled = i===max;
+    prevBtn.disabled = i===0;
+    nextBtn.disabled = i===max;
   }
+
   prevBtn.onclick = ()=>{ if(i>0){ i--; update(); } };
   nextBtn.onclick = ()=>{ if(i<max){ i++; update(); } };
   dotsBox.addEventListener('click', e=>{
     const dot = e.target.closest('.dot'); if(!dot) return;
-    i = +dot.dataset.idx; update();
+    const idx = Number(dot.dataset.idx);
+    if(Number.isFinite(idx)){ i = idx; update(); }
   });
 
-  // Touch swipe
-  let startX=0, dx=0, touching=false;
-  slidesWrap.addEventListener('touchstart', (e)=>{ touching=true; startX = e.touches[0].clientX; dx=0; }, {passive:true});
-  slidesWrap.addEventListener('touchmove', (e)=>{ if(!touching) return; dx = e.touches[0].clientX - startX; }, {passive:true});
-  slidesWrap.addEventListener('touchend', ()=>{
-    if(Math.abs(dx)>40){ if(dx<0 && i<max) i++; if(dx>0 && i>0) i--; update(); }
-    touching=false; dx=0;
-  });
+  if(hasMultiple){
+    let pointerId = null;
+    let startX = 0;
+    let deltaX = 0;
+    let width = 1;
+
+    function beginDrag(e){
+      if(e.pointerType === 'mouse' && e.button !== 0) return;
+      if(pointerId !== null) return;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      deltaX = 0;
+      width = root.getBoundingClientRect().width || 1;
+      root.classList.add('dragging');
+      slidesWrap.style.transition = 'none';
+      try{ slidesWrap.setPointerCapture(pointerId); }catch{}
+    }
+
+    function moveDrag(e){
+      if(pointerId === null || e.pointerId !== pointerId) return;
+      deltaX = e.clientX - startX;
+      const percent = (deltaX / width) * 100;
+      setPosition((-i*100) + percent);
+    }
+
+    function endDrag(e, canceled=false){
+      if(pointerId === null || (e && e.pointerId !== pointerId)) return;
+      root.classList.remove('dragging');
+      try{ slidesWrap.releasePointerCapture(pointerId); }catch{}
+      slidesWrap.style.transition = '';
+      if(!canceled){
+        if(Math.abs(deltaX) > width * THRESHOLD){
+          if(deltaX < 0 && i < max) i++;
+          else if(deltaX > 0 && i > 0) i--;
+        }
+      }
+      pointerId = null;
+      deltaX = 0;
+      update();
+    }
+
+    slidesWrap.addEventListener('pointerdown', e=>{ beginDrag(e); });
+    slidesWrap.addEventListener('pointermove', e=>{ moveDrag(e); });
+    slidesWrap.addEventListener('pointerup', e=>{ endDrag(e); });
+    slidesWrap.addEventListener('pointercancel', e=>{ endDrag(e, true); });
+    slidesWrap.addEventListener('pointerleave', e=>{ if(pointerId!==null) endDrag(e, true); });
+  }
 
   update();
 }
