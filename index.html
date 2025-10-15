@@ -197,24 +197,32 @@ header .spacer{flex:1}
 
 .slider{
   position:relative;
-  /* важливо: фіксуємо висоту через aspect-ratio і не даємо внутрішнім елементам змінювати її */
   aspect-ratio: 4 / 3;
-  cursor: grab;
+  overflow:hidden;
+  cursor:grab;
 }
 
 .slider.is-single{ cursor: default; }
+.slider.dragging{ cursor:grabbing; }
 
 .slider .slides{
   display:flex;
-  height:100%;                 /* було без висоти */
-  transition:transform .45s cubic-bezier(.22,.61,.36,1);
-  will-change:transform;
-  touch-action: pan-y;
+  height:100%;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scroll-padding:0;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  gap:0;
   user-select:none;
+  -webkit-user-select:none;
+  overscroll-behavior-x:contain;
 }
 
-.slider.dragging{ cursor: grabbing; }
-.slider.dragging .slides{ transition:none !important; }
+.slider.is-single .slides{ overflow-x:hidden; }
+
+.slider .slides::-webkit-scrollbar{ display:none; }
 
 .slider .dots{
   position:absolute;
@@ -250,10 +258,14 @@ header .spacer{flex:1}
   .slider .slides{ transition:none !important; }
 }
 
+
 .slide{
   min-width:100%;
-  height:100%;                 /* прибрали "height:0; padding-bottom:75%" */
+  height:100%;
   position:relative;
+  flex:0 0 100%;
+  scroll-snap-align:center;
+  scroll-snap-stop:always;
 }
 
 .slide img{
@@ -2240,8 +2252,14 @@ function initSlider(root, imgs){
   const dotsBox = root.querySelector('.dots');
   if(!slidesWrap || !prevBtn || !nextBtn || !dotsBox) return;
 
+  if(root._sliderResizeObserver){
+    try{ root._sliderResizeObserver.disconnect(); }catch{}
+    root._sliderResizeObserver = null;
+  }
+
   const urls = (imgs && imgs.length ? imgs : [DEFAULT_IMG]).map(u=>u||DEFAULT_IMG);
   slidesWrap.innerHTML=''; dotsBox.innerHTML='';
+  slidesWrap.scrollLeft = 0;
 
   urls.forEach((src,idx)=>{
     const s = document.createElement('div'); s.className='slide';
@@ -2260,74 +2278,105 @@ function initSlider(root, imgs){
 
   let i = 0;
   const max = urls.length - 1;
-  const THRESHOLD = 0.18;
 
-  const setPosition = percent => { slidesWrap.style.transform = `translateX(${percent}%)`; };
+  const slideWidth = ()=>{
+    const base = root.getBoundingClientRect().width;
+    return base || slidesWrap.getBoundingClientRect().width || 1;
+  };
 
-  function update(){
-    setPosition(-i*100);
+  function updateUI(){
     dotsBox.querySelectorAll('.dot').forEach((d,di)=>d.classList.toggle('active', di===i));
     prevBtn.disabled = i===0;
     nextBtn.disabled = i===max;
   }
 
-  prevBtn.onclick = ()=>{ if(i>0){ i--; update(); } };
-  nextBtn.onclick = ()=>{ if(i<max){ i++; update(); } };
+  function scrollToIndex(behavior='smooth'){
+    const left = slideWidth() * i;
+    if(typeof slidesWrap.scrollTo === 'function'){
+      try{ slidesWrap.scrollTo({ left, top:0, behavior }); return; }catch{}
+    }
+    slidesWrap.scrollLeft = left;
+  }
+
+  function goTo(idx, behavior='smooth'){
+    i = Math.max(0, Math.min(max, idx));
+    updateUI();
+    if(hasMultiple){ scrollToIndex(behavior); }
+  }
+
+  prevBtn.onclick = ()=>{ if(i>0){ goTo(i-1); } };
+  nextBtn.onclick = ()=>{ if(i<max){ goTo(i+1); } };
   dotsBox.addEventListener('click', e=>{
     const dot = e.target.closest('.dot'); if(!dot) return;
     const idx = Number(dot.dataset.idx);
-    if(Number.isFinite(idx)){ i = idx; update(); }
+    if(Number.isFinite(idx)){ goTo(idx); }
   });
 
   if(hasMultiple){
+    let raf = 0;
     let pointerId = null;
     let startX = 0;
-    let deltaX = 0;
-    let width = 1;
+    let startScroll = 0;
 
-    function beginDrag(e){
+    const handleScroll = ()=>{
+      raf = 0;
+      const width = slideWidth();
+      if(width <= 1) return;
+      const idx = Math.round(slidesWrap.scrollLeft / width);
+      if(idx !== i){
+        i = Math.min(max, Math.max(0, idx));
+        updateUI();
+      }
+    };
+
+    slidesWrap.addEventListener('scroll', ()=>{
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(handleScroll);
+    });
+
+    slidesWrap.addEventListener('pointerdown', e=>{
       if(e.pointerType === 'mouse' && e.button !== 0) return;
       if(pointerId !== null) return;
       pointerId = e.pointerId;
       startX = e.clientX;
-      deltaX = 0;
-      width = root.getBoundingClientRect().width || 1;
+      startScroll = slidesWrap.scrollLeft;
       root.classList.add('dragging');
-      slidesWrap.style.transition = 'none';
       try{ slidesWrap.setPointerCapture(pointerId); }catch{}
-    }
+    });
 
-    function moveDrag(e){
+    slidesWrap.addEventListener('pointermove', e=>{
       if(pointerId === null || e.pointerId !== pointerId) return;
-      deltaX = e.clientX - startX;
-      const percent = (deltaX / width) * 100;
-      setPosition((-i*100) + percent);
-    }
+      const delta = e.clientX - startX;
+      slidesWrap.scrollLeft = startScroll - delta;
+    });
 
-    function endDrag(e, canceled=false){
+    function releasePointer(e){
       if(pointerId === null || (e && e.pointerId !== pointerId)) return;
-      root.classList.remove('dragging');
-      try{ slidesWrap.releasePointerCapture(pointerId); }catch{}
-      slidesWrap.style.transition = '';
-      if(!canceled){
-        if(Math.abs(deltaX) > width * THRESHOLD){
-          if(deltaX < 0 && i < max) i++;
-          else if(deltaX > 0 && i > 0) i--;
-        }
-      }
       pointerId = null;
-      deltaX = 0;
-      update();
+      root.classList.remove('dragging');
+      try{
+        if(typeof slidesWrap.hasPointerCapture === 'function'){
+          if(slidesWrap.hasPointerCapture(e.pointerId)){ slidesWrap.releasePointerCapture(e.pointerId); }
+        }else{
+          slidesWrap.releasePointerCapture(e.pointerId);
+        }
+      }catch{}
+      goTo(i);
     }
 
-    slidesWrap.addEventListener('pointerdown', e=>{ beginDrag(e); });
-    slidesWrap.addEventListener('pointermove', e=>{ moveDrag(e); });
-    slidesWrap.addEventListener('pointerup', e=>{ endDrag(e); });
-    slidesWrap.addEventListener('pointercancel', e=>{ endDrag(e, true); });
-    slidesWrap.addEventListener('pointerleave', e=>{ if(pointerId!==null) endDrag(e, true); });
+    slidesWrap.addEventListener('pointerup', releasePointer);
+    slidesWrap.addEventListener('pointercancel', releasePointer);
+    slidesWrap.addEventListener('pointerleave', releasePointer);
+
+    if(typeof ResizeObserver !== 'undefined'){
+      if(root._sliderResizeObserver){ root._sliderResizeObserver.disconnect(); }
+      const ro = new ResizeObserver(()=>{ goTo(i, 'auto'); });
+      ro.observe(root);
+      root._sliderResizeObserver = ro;
+    }
   }
 
-  update();
+  goTo(0, 'auto');
 }
 
 /* ========= Render ========= */
