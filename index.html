@@ -53,6 +53,16 @@
     .price-title{font-size:12px;font-weight:800;color:var(--accent);margin-bottom:4px;text-transform:uppercase}
     .pill{display:inline-block;font-variant-numeric:tabular-nums;padding:7px 10px;border-radius:10px;border:1px solid #e6e8ef;font-weight:700}
     .card .footer{margin-top:auto;padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:10px}
+    /* ефект підсвічування тінню при наведенні на картку товару */
+    .card {
+      transition: transform .25s ease, box-shadow .25s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06);
+    }
+    .card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+      cursor: pointer;
+    }
 
     .slider{position:relative;aspect-ratio:4/3;overflow:hidden}
     .slides{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -86,7 +96,24 @@
     .total{font-weight:800}
     .ok{color:#059669}.bad{color:#b91c1c}
     .tag{display:inline-block;border:1px dashed var(--border);padding:2px 8px;border-radius:999px;font-size:12px}
-
+#checkout{
+  display:flex;                /* дозволяє керувати внутрішньою висотою */
+  flex-direction:column;
+  max-height:100svh;           /* враховує мобільні панелі */
+}
+#checkout .ck-body{
+  flex:1 1 auto;
+  min-height:0;                /* щоб flex-дитина могла скролитися */
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+@media (max-width:560px){
+  #checkout{
+    border-top-left-radius:16px;
+    border-top-right-radius:16px;
+  }
+}
     /* ==== Mobile polish ==== */
     @media (max-width: 560px){
       header{flex-wrap:wrap;gap:8px}
@@ -247,6 +274,29 @@ label.field.err .input{
   box-shadow:0 0 0 2px rgba(239,68,68,.15) !important;
 }
 
+
+  /* === WHOLESALE BADGES === */
+  .wholesale-flag{
+    display:none;
+    align-items:center;
+    gap:8px;
+    margin:6px 0 8px;
+    padding:8px 10px;
+    border-radius:10px;
+    background: linear-gradient(90deg, rgba(16,185,129,.12), rgba(16,185,129,.06));
+    border:1px solid rgba(16,185,129,.35);
+    font-weight:600; font-size:12px;
+  }
+  .wholesale-flag:before{ content:"✓"; font-weight:700 }
+  .wholesale-note{
+    display:none;
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:10px;
+    background: linear-gradient(90deg, rgba(16,185,129,.12), rgba(16,185,129,.06));
+    border:1px solid rgba(16,185,129,.35);
+    font-size:12px; font-weight:600;
+  }
 </style>
 </head>
 <body>
@@ -504,6 +554,27 @@ label.field.err .input{
     // ==== УТИЛІТИ
     const fmtUAH = v => (Math.round(v).toLocaleString('uk-UA')+ ' грн');
     const fmtUSD = v => ('$' + (Math.round(v*100)/100).toFixed(2));
+    // ==== ОПТОВЕ ЦІНОУТВОРЕННЯ
+    const WHOLESALE_THRESHOLD_USD = 500;
+    function wholesaleActive(){
+      const retailUSD = state.cart.reduce((s,i)=> s + i.qty * (i.retailUSD ?? i.priceUSD ?? 0), 0);
+      return retailUSD > WHOLESALE_THRESHOLD_USD;
+    }
+    function priceFor(item){
+      if(wholesaleActive()){
+        return {
+          UAH: item.wholesaleUAH ?? item.priceUAH ?? item.retailUAH ?? 0,
+          USD: item.wholesaleUSD ?? item.priceUSD ?? item.retailUSD ?? 0,
+          mode: 'wholesale'
+        };
+      }
+      return {
+        UAH: item.retailUAH ?? item.priceUAH ?? 0,
+        USD: item.retailUSD ?? item.priceUSD ?? 0,
+        mode: 'retail'
+      };
+    }
+
     const round2 = v => Math.round(v*100)/100;
     const el = sel => document.querySelector(sel);
 
@@ -594,9 +665,13 @@ grid.appendChild(node);
     function saveCart(){ localStorage.setItem('cart', JSON.stringify(state.cart)); }
     function cartTotals(){
       const qty = state.cart.reduce((s,i)=> s+i.qty, 0);
-      const sumUAH = state.cart.reduce((s,i)=> s+i.qty*i.priceUAH, 0);
-      const sumUSD = state.cart.reduce((s,i)=> s+i.qty*i.priceUSD, 0);
-      return {qty, sumUAH, sumUSD};
+      const sums = state.cart.reduce((acc,i)=> {
+        const pf = priceFor(i);
+        acc.sumUAH += i.qty * pf.UAH;
+        acc.sumUSD += i.qty * pf.USD;
+        return acc;
+      }, {sumUAH:0, sumUSD:0});
+      return {qty, ...sums};
     }
     function refreshCartBadge(){ cartCount.textContent = cartTotals().qty; }
 
@@ -610,7 +685,9 @@ function addToCart(p){
     type: p.type || '',     // ← важливо
     color: p.color || '',   // ← важливо
     img: (p.imgs?.[0] || CONFIG.DEFAULT_IMG),
+    retailUAH: p.retailUAH, wholesaleUAH: p.wholesaleUAH,
     priceUAH: p.retailUAH,
+    retailUSD: p.retailUSD, wholesaleUSD: p.wholesaleUSD,
     priceUSD: p.retailUSD,
     qty: 1
   };
@@ -634,7 +711,9 @@ function addToCart(p){
               <button class="btn" data-inc>+</button>
             </div>
           </div>
-          <div><b>${fmtUAH(item.priceUAH * item.qty)}</b><br><small class="hint">${fmtUSD(item.priceUSD * item.qty)}</small><br><button class="btn" data-del>Видалити</button></div>
+          <div><b>${fmtUAH(priceFor(item).UAH * item.qty)}</b><br>
+              <small class="hint">${fmtUSD(priceFor(item).USD * item.qty)}</small>
+              <br><button class="btn" data-del>Видалити</button></div>
         `;
         row.querySelector('[data-inc]').onclick = ()=>{ item.qty++; saveCart(); renderCart(); refreshCartBadge(); };
         row.querySelector('[data-dec]').onclick = ()=>{ item.qty=Math.max(1,item.qty-1); saveCart(); renderCart(); refreshCartBadge(); };
@@ -646,6 +725,32 @@ function addToCart(p){
       el('#cartTotal').textContent = `${fmtUAH(sumUAH)} • ${fmtUSD(sumUSD)}`;
       el('#ckItems').textContent = `${qty} товарів`;
       el('#ckTotal').textContent = fmtUAH(applyPromo(sumUAH));
+
+      // Показати/сховати позначку "Опт застосовано"
+      const flagId = 'wholesaleFlag';
+      let flag = document.getElementById(flagId);
+      if(!flag){
+        const foot = document.querySelector('#cart .foot');
+        flag = document.createElement('div');
+        flag.id = flagId;
+        flag.className = 'wholesale-flag';
+        foot.insertBefore(flag, foot.firstChild);
+      }
+      flag.textContent = wholesaleActive() ? 'Опт застосовано: ціни за оптом' : '';
+      flag.style.display = wholesaleActive() ? 'flex' : 'none';
+
+      // Аналогічна підказка у чекауті
+      const nId = 'ckWholesaleNote';
+      let note = document.getElementById(nId);
+      if(!note){
+        note = document.createElement('div');
+        note.id = nId;
+        note.className = 'wholesale-note';
+        const step3 = document.querySelector('#checkout .step:nth-of-type(3)');
+        step3 && step3.appendChild(note);
+      }
+      note.textContent = wholesaleActive() ? 'Застосовано оптові ціни (поріг $500 перевищено)' : '';
+      note.style.display = wholesaleActive() ? 'block' : 'none';
     }
 
     el('#cartClear').onclick = ()=>{ state.cart=[]; saveCart(); renderCart(); refreshCartBadge(); };
@@ -669,7 +774,12 @@ function addToCart(p){
     el('#closeCheckout').onclick = ()=> closeCheckout();
     el('#backToCart').onclick = ()=>{ closeCheckout(); openCart(); };
 
-    function openCheckout(){ checkout.classList.add('open'); checkout.setAttribute('aria-hidden','false'); }
+    function openCheckout(){
+  checkout.classList.add('open');
+  checkout.setAttribute('aria-hidden','false');
+  const body = checkout.querySelector('.ck-body');
+  if(body){ body.scrollTop = 0; }
+}
     function closeCheckout(){ checkout.classList.remove('open'); checkout.setAttribute('aria-hidden','true'); }
     function openCheckoutWithItem(p){ addToCart(p); openCheckout(); }
 
@@ -995,22 +1105,20 @@ function boot(){
   }
 
   // Prepay availability and summary
-  function updatePaymentAvailability(){
-    const sel = document.getElementById('fPay');
-    if(!sel) return;
-    const prepay = sel.querySelector('option[value="prepay"]');
-    if(!prepay) return;
-    try{
-      const totals = typeof cartTotals==='function' ? cartTotals() : null;
-      const sumUSD = totals?.sumUSD ?? 0;
-      if(sumUSD > 499.99){
-        prepay.disabled = true;
-        if(sel.value === 'prepay') sel.value = 'full';
-      }else{
-        prepay.disabled = false;
-      }
-    }catch(e){ /* ignore */ }
+function updatePaymentAvailability(){
+  const sel = document.getElementById('fPay');
+  if(!sel) return;
+  const prepay = sel.querySelector('option[value="prepay"]');
+  if(!prepay) return;
+
+  // Забороняємо "Передоплата 200 грн", якщо активовано оптові ціни
+  const isWholesale = (typeof wholesaleActive === 'function') ? wholesaleActive() : false;
+  prepay.disabled = !!isWholesale;
+  if(isWholesale && sel.value === 'prepay'){
+    sel.value = 'full';
   }
+}
+
   function updatePaySummary(){
     const sel = document.getElementById('fPay');
     const totalEl = document.getElementById('ckTotal');
