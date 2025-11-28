@@ -1,17 +1,16 @@
 <!DOCTYPE html>
+
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bouletta — інтернет‑магазин</title>
-  <meta name="description" content="Шкіряні сумки та аксесуари Bouletta. Офіційний каталог, швидка доставка, безпечна оплата." />
-  <!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Bouletta — інтернет‑магазин</title>
+<meta content="Шкіряні сумки та аксесуари Bouletta. Офіційний каталог, швидка доставка, безпечна оплата." name="description"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<style>
     :root{--bg:#f6f7fb;--card:#fff;--text:#16181d;--muted:#6b7280;--primary:#2563eb;--border:#e5e7eb;--accent:#111827}
     *{box-sizing:border-box}
     html{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;scroll-behavior:smooth}
@@ -298,166 +297,283 @@ label.field.err .input{
     font-size:12px; font-weight:600;
   }
 </style>
-</head>
+<style id="desc-modal-styles">
+/* === Description button (distinct from primary) === */
+.btn.ghost{
+  background:#fff;
+  border:1px dashed var(--border);
+  color:var(--accent);
+  border-radius:12px;
+  transition:background-color .2s, box-shadow .2s, transform .15s;
+}
+.btn.ghost:hover{ background:#f9fafb; box-shadow:0 2px 8px rgba(0,0,0,.06); transform:translateY(-1px) }
+.btn.ghost:active{ transform:none; box-shadow:0 1px 4px rgba(0,0,0,.04) }
+
+/* === Product modal (compact, animated) === */
+#prodModalOverlay{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.35); z-index:80; backdrop-filter:saturate(120%) blur(2px);
+  transition:opacity .2s ease;
+}
+#prodModalOverlay.open{ display:flex; }
+#prodModalOverlay .panel{
+  width:min(680px, 92vw);
+  max-height:80vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  transform:scale(.96);
+  opacity:0;
+  transition:transform .18s ease, opacity .18s ease;
+}
+#prodModalOverlay.open .panel{ transform:scale(1); opacity:1 }
+
+#prodModalOverlay .ph{
+  display:flex; align-items:center; gap:8px;
+  padding:12px 14px; border-bottom:1px solid var(--border);
+}
+#prodModalOverlay .pb{ padding:14px; display:grid; gap:10px; line-height:1.55; }
+#prodModalOverlay .actions{ display:flex; gap:8px; justify-content:flex-end; padding:12px 14px; border-top:1px solid var(--border) }
+#prodModalClose{ min-width:44px }
+.desc-meta{ display:flex; flex-wrap:wrap; gap:8px; }
+.desc-meta .badge{ background:#f8fafc }
+.desc-prices{ display:flex; flex-wrap:wrap; gap:8px; }
+</style><style id="flip-card-styles">
+/* === Flip card for product description (safe version) === */
+.card{ perspective:1000px; --flip-h: auto;}
+.card .flip-inner{
+  position:relative;
+  transform-style:preserve-3d;
+  transition: transform .5s ease;
+  width: 100%;
+  min-height: var(--flip-h);
+  height: var(--flip-h);
+  will-change: transform;
+  transition: transform .44s cubic-bezier(.22,.61,.36,1);
+  transform-origin: center center; /* стабільний “шарнір” */
+<!--  backface-visibility: hidden;-->
+  -webkit-backface-visibility: hidden;
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* розтягує елементи по вертикалі */
+}
+
+.product-info {
+  margin-top: auto; /* притискає блок вниз */
+}
+
+.card.flipped .flip-inner{ transform: rotateY(180deg); }
+
+.card .front, .card .back{
+  position:absolute; inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  display:flex; flex-direction:column;
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+.card .front{ z-index:2; }
+.card .back{
+  transform: rotateY(180deg);
+  background: var(--card,#fff);
+  border-radius:16px;
+  padding:12px;
+  gap:10px;
+  overflow:auto;
+}
+.desc-head{ display:flex; gap:8px; align-items:center; }
+.desc-head .title{ font-weight:800; line-height:1.25; }
+.desc-scroll{ flex:1 1 auto; min-height:0; overflow:auto; border:1px solid var(--border); border-radius:12px; padding:10px; background:#fafafa; }
+.desc-actions{ display:flex; gap:8px; align-items:center; }
+.btn.back{ background:#fff; border:1px solid var(--border); border-radius:12px; }
+.btn.back:hover{ background:#f9fafb }
+
+@media (max-width:560px){
+  .card .flip-inner{
+    min-height: var(--flip-h);
+  }
+}
+
+/* Keep both sides equal to front height */
+.card { --flip-h: auto; }
+
+.card .flip-inner{
+  width: 100%;
+  height: var(--flip-h);
+  min-height: var(--flip-h);
+}
+
+/* обидві сторони займають однакову висоту контейнера */
+.card .front,
+.card .back{
+  height: 100%;
+}
+
+/* бек скролиться всередині, не впливає на розмір картки */
+.card .back{
+  overflow: auto;
+}
+button.desc-toggle img.desc-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+
+</style></head>
 <body>
-  <header>
-    <h1>Bouletta — каталог</h1>
-    <div class="spacer"></div>
-    <button class="btn" id="resetBtn">Скинути фільтр</button>
-    <button class="btn icon" id="cartBtn">Кошик (<span id="cartCount">0</span>)</button>
-  </header>
+<header>
+<h1>Bouletta — каталог</h1>
+<div class="spacer"></div>
+<button class="btn" id="resetBtn">Скинути фільтр</button>
+<button class="btn icon" id="cartBtn">Кошик (<span id="cartCount">0</span>)</button>
+</header>
+<section class="toolbar">
+<div>
+<div class="label">Тип товару</div>
+<select class="input" id="typeSel"><option value="">Всі</option></select>
+</div>
+<div>
+<div class="label">Колір</div>
+<select class="input" id="colorSel"><option value="">Всі</option></select>
+</div>
+<div>
+<div class="label">Сортування</div>
+<select class="input" id="sort">
+<option value="name-asc">Назва (А→Я)</option>
+<option value="name-desc">Назва (Я→А)</option>
+<option value="retailUAH-asc">Роздріб UAH ↑</option>
+<option value="retailUAH-desc">Роздріб UAH ↓</option>
+<option value="wholesaleUAH-asc">Опт UAH ↑</option>
+<option value="wholesaleUAH-desc">Опт UAH ↓</option>
+</select>
+</div>
+</section>
+<section class="toolbar" style="border-top:0">
+<div>
+<div class="label">Курс USD → UAH</div>
+<div class="row" style="display:flex;gap:8px;align-items:center">
+<input class="input" id="rateInput" inputmode="decimal" placeholder="Напр.: 41.00" style="max-width:150px"/>
+<button class="btn" id="btnUpdateRate">Оновити (НБУ)</button>
+</div>
+<small class="hint" id="rateInfo">Поточний курс: 41.00</small>
+</div>
+<div>
+<div class="label">Експорт</div>
+<div class="row" style="display:flex;gap:8px;align-items:center">
+<button class="btn" id="exportXLSX">Excel</button>
+</div>
+<small class="hint">Експорт поточно відфільтрованих товарів</small>
+</div>
+<div>
+<input id="promo" style="display:none"/>
+</div>
+</section>
+<div class="status" id="status"></div>
+<section class="container" id="grid"></section>
+<!-- Кошик -->
+<aside id="cart">
+<div class="head">
+<strong style="font-size:14px">Ваш кошик</strong>
+<div class="spacer"></div>
+<button class="btn" id="closeCart">✕</button>
+</div>
+<div class="body" id="cartList"></div>
+<div class="foot">
+<div class="row" style="display:flex;justify-content:space-between;align-items:center;margin:6px 0"><span>Разом</span><b id="cartTotal">0 грн • $0</b></div>
+<div class="row" style="display:flex;gap:8px;align-items:center">
+<button class="btn" id="cartClear">Очистити</button>
+<div class="spacer"></div>
+<button class="btn primary" id="checkoutBtn">Оформити</button>
+</div>
+</div>
+</aside>
+<!-- Чекаут -->
+<section aria-hidden="false" id="checkout">
+<div class="ck-head">
+<strong>Оформлення замовлення</strong>
+<div class="spacer"></div>
+<button class="btn" id="closeCheckout">Згорнути</button>
+</div>
+<div class="ck-body">
+<!-- КРОК 1: Контакти -->
+<div class="step">
+<h4>1) Контакти</h4>
+<div class="grid">
+<label class="field"><span>Ім’я та прізвище*</span><input class="input" id="fName" placeholder="Олексій Іваненко" required=""/></label>
+<label class="field"><span>Телефон*</span><input class="input" id="fPhone" placeholder="+380" required=""/></label>
+<label class="field"><span>Email</span><input class="input" id="fEmail" placeholder="name@email.com"/></label>
+<label class="field"><span>Коментар</span><input class="input" id="fNote" placeholder="Побажання до замовлення"/></label>
+</div>
+<small class="hint">Позначені * поля — обов’язкові.</small>
+</div>
+<!-- КРОК 2: Доставка -->
+<div class="step">
+<h4>2) Доставка</h4>
+<div class="grid">
+<label class="field"><span>Спосіб*</span>
+<select class="input" id="fShip">
+<option value="nova">Нова Пошта (відділення)</option>
+<option value="np_courier">Нова Пошта (кур’єр)</option>
+<option value="meest">Meest</option>
+<option value="pickup">Самовивіз</option>
+</select>
+</label>
+<label class="field"><span>Місто*</span><input class="input" id="fCity" placeholder="Київ" required=""/></label>
+<label class="field"><span>Відділення/Адреса*</span><input class="input" id="fAddress" placeholder="№ відділення або адреса" required=""/></label>
+<div></div>
+</div>
+</div>
+<!-- КРОК 3: Оплата та підтвердження -->
+<div class="step">
+<h4>3) Оплата</h4>
+<div class="grid">
+<label class="field"><span>Метод*</span>
+<select class="input" id="fPay">
+<option value="prepay">Передоплата (200 грн)</option>
+<option value="full">Повна оплата</option>
+</select>
+</label>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+<small class="hint">Підсумок: <span id="ckItems">0 товарів</span></small>
+<div><span class="hint">До сплати</span> <span class="total" id="ckTotal">0 грн</span></div>
+</div>
+<div class="ck-actions" style="display:flex;gap:8px;align-items:center;margin-top:10px">
+<button class="btn" id="backToCart">← До кошика</button>
+<div class="spacer"></div>
+<button class="btn primary" id="placeOrderBtn">Підтвердити замовлення</button>
+</div>
+<small class="hint" id="submitState"></small>
+</div>
+</div>
+</section>
+<template id="cardTpl"><article class="card">
+<div class="media"><div class="slider"><div class="slides"></div></div></div>
+<div class="body">
+<h3 class="name"></h3>
+<div class="barcode"></div>
+<div class="meta"><span class="type badge"></span><span class="color badge"></span></div>
+<div class="prices">
+<div class="price-block retail-block"><div class="price-title">Роздріб</div><div class="price-row"><span class="pill retail"></span><span class="pill retailUSD"></span></div></div>
+<div class="price-block wholesale-block"><div class="price-title">Опт</div><div class="price-row"><span class="pill opt"></span><span class="pill optUSD"></span></div></div>
+</div>
+</div>
+<div class="footer">
+<div class="spacer"></div>
+<button class="btn primary add">У кошик</button>
+</div>
+</article></template>
 
-  <section class="toolbar">
-    <div>
-      <div class="label">Тип товару</div>
-      <select id="typeSel" class="input"><option value="">Всі</option></select>
-    </div>
-    <div>
-      <div class="label">Колір</div>
-      <select id="colorSel" class="input"><option value="">Всі</option></select>
-    </div>
-    <div>
-      <div class="label">Сортування</div>
-      <select id="sort" class="input">
-        <option value="name-asc">Назва (А→Я)</option>
-        <option value="name-desc">Назва (Я→А)</option>
-        <option value="retailUAH-asc">Роздріб UAH ↑</option>
-        <option value="retailUAH-desc">Роздріб UAH ↓</option>
-        <option value="wholesaleUAH-asc">Опт UAH ↑</option>
-        <option value="wholesaleUAH-desc">Опт UAH ↓</option>
-      </select>
-    </div>
-  </section>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
 
-  <section class="toolbar" style="border-top:0">
-    <div>
-      <div class="label">Курс USD → UAH</div>
-      <div class="row" style="display:flex;gap:8px;align-items:center">
-        <input id="rateInput" class="input" inputmode="decimal" placeholder="Напр.: 41.00" style="max-width:150px" />
-        <button class="btn" id="btnUpdateRate">Оновити (НБУ)</button>
-      </div>
-      <small class="hint" id="rateInfo">Поточний курс: 41.00</small>
-    </div>
-    <div>
-      <div class="label">Експорт</div>
-      <div class="row" style="display:flex;gap:8px;align-items:center">
-        <button class="btn" id="exportXLSX">Excel</button>
-      </div>
-      <small class="hint">Експорт поточно відфільтрованих товарів</small>
-    </div>
-    <div>
-        <input id="promo" style="display:none">
-      </div>
-    </div>
-  </section>
-
-  <div class="status" id="status"></div>
-  <section class="container" id="grid"></section>
-
-  <!-- Кошик -->
-  <aside id="cart">
-    <div class="head">
-      <strong style="font-size:14px">Ваш кошик</strong>
-      <div class="spacer"></div>
-      <button class="btn" id="closeCart">✕</button>
-    </div>
-    <div class="body" id="cartList"></div>
-    <div class="foot">
-      <div class="row" style="display:flex;justify-content:space-between;align-items:center;margin:6px 0"><span>Разом</span><b id="cartTotal">0 грн • $0</b></div>
-      <div class="row" style="display:flex;gap:8px;align-items:center">
-        <button class="btn" id="cartClear">Очистити</button>
-        <div class="spacer"></div>
-        <button class="btn primary" id="checkoutBtn">Оформити</button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Чекаут -->
-  <section id="checkout" aria-hidden="true">
-    <div class="ck-head">
-      <strong>Оформлення замовлення</strong>
-      <div class="spacer"></div>
-      <button class="btn" id="closeCheckout">Згорнути</button>
-    </div>
-    <div class="ck-body">
-      <!-- КРОК 1: Контакти -->
-      <div class="step">
-        <h4>1) Контакти</h4>
-        <div class="grid">
-          <label class="field"><span>Ім’я та прізвище*</span><input id="fName" class="input" placeholder="Олексій Іваненко" required></label>
-          <label class="field"><span>Телефон*</span><input id="fPhone" class="input" placeholder="+380" required></label>
-          <label class="field"><span>Email</span><input id="fEmail" class="input" placeholder="name@email.com"></label>
-          <label class="field"><span>Коментар</span><input id="fNote" class="input" placeholder="Побажання до замовлення"></label>
-        </div>
-        <small class="hint">Позначені * поля — обов’язкові.</small>
-      </div>
-
-      <!-- КРОК 2: Доставка -->
-      <div class="step">
-        <h4>2) Доставка</h4>
-        <div class="grid">
-          <label class="field"><span>Спосіб*</span>
-            <select id="fShip" class="input">
-              <option value="nova">Нова Пошта (відділення)</option>
-              <option value="np_courier">Нова Пошта (кур’єр)</option>
-              <option value="meest">Meest</option>
-              <option value="pickup">Самовивіз</option>
-            </select>
-          </label>
-          <label class="field"><span>Місто*</span><input id="fCity" class="input" placeholder="Київ" required></label>
-          <label class="field"><span>Відділення/Адреса*</span><input id="fAddress" class="input" placeholder="№ відділення або адреса" required></label>
-          <div></div>
-        </div>
-      </div>
-
-      <!-- КРОК 3: Оплата та підтвердження -->
-      <div class="step">
-        <h4>3) Оплата</h4>
-        <div class="grid">
-          <label class="field"><span>Метод*</span>
-            <select id="fPay" class="input">
-      <option value="prepay">Передоплата (200 грн)</option>
-      <option value="full">Повна оплата</option>
-    </select>
-          </label>
-
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-          <small class="hint">Підсумок: <span id="ckItems">0 товарів</span></small>
-          <div><span class="hint">До сплати</span> <span id="ckTotal" class="total">0 грн</span></div>
-        </div>
-        <div class="ck-actions" style="display:flex;gap:8px;align-items:center;margin-top:10px">
-          <button class="btn" id="backToCart">← До кошика</button>
-          <div class="spacer"></div>
-          <button class="btn primary" id="placeOrderBtn">Підтвердити замовлення</button>
-        </div>
-        <small class="hint" id="submitState"></small>
-      </div>
-    </div>
-  </section>
-
-  <template id="cardTpl">
-    <article class="card">
-      <div class="media"><div class="slider"><div class="slides"></div></div></div>
-      <div class="body">
-        <h3 class="name"></h3>
-        <div class="barcode"></div>
-        <div class="meta"><span class="type badge"></span><span class="color badge"></span></div>
-        <div class="prices">
-          <div class="price-block retail-block"><div class="price-title">Роздріб</div><div class="price-row"><span class="pill retail"></span><span class="pill retailUSD"></span></div></div>
-          <div class="price-block wholesale-block"><div class="price-title">Опт</div><div class="price-row"><span class="pill opt"></span><span class="pill optUSD"></span></div></div>
-        </div>
-      </div>
-      <div class="footer">
-
-        <div class="spacer"></div>
-        <button class="btn primary add">У кошик</button>
-      </div>
-    </article>
-  </template>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
-// === Required validation & mask ===
+    // === Required validation & mask ===
 (function(){
   const ids=['fName','fPhone','fCity','fAddress'];
   const $=id=>document.getElementById(id);
@@ -511,8 +627,8 @@ label.field.err .input{
 })();
 
 </script>
-  <script src="products.js"></script>
-  <script>
+<script src="products.js"></script>
+<script>
 // Нормалізація каталогу: створюємо CATALOG без зміни const products
 (function(){
   let base = [];
@@ -520,22 +636,28 @@ label.field.err .input{
     if (Array.isArray(window.products)) base = window.products;
     else if (typeof products !== 'undefined' && Array.isArray(products)) base = products;
   }catch(e){ base = []; }
+
   window.CATALOG = base.map(p => ({
-    ...p,
+    ...p, // ← важливо! було .p (помилка)
     barcode: String(p?.barcode ?? '').trim(),
-    name: String(p?.name ?? '').trim(),
-    type: p?.type ? String(p.type).trim() : '',
-    color: p?.color ? String(p.color).trim() : '',
-    imgs: Array.isArray(p?.imgs) ? p.imgs.filter(Boolean) : []
+    name:    String(p?.name ?? '').trim(),
+    type:    p?.type  ? String(p.type).trim()  : '',
+    color:   p?.color ? String(p.color).trim() : '',
+    imgs:    Array.isArray(p?.imgs) ? p.imgs.filter(Boolean) : [],
+    // гарантуємо опис
+    description: (typeof p?.description === 'string' && p.description.trim())
+                 ? p.description
+                 : (typeof p?.desc === 'string' ? p.desc : '')
   }));
 })();
 </script>
 
-  <script>
+
+<script>
     /* =================== CONFIG =================== */
     const CONFIG = {
       DEFAULT_IMG: 'https://placehold.co/800x600/png?text=Фото',
-      RATE: 41.20,
+      RATE: 41.00,
       PROMOCODES: { 'WELCOME5': 0.05, 'VIP10': 0.10 },
       APPS_SCRIPT_WEBHOOK: 'https://script.google.com/macros/s/AKfycbwLb1Hmyb5HZPfutet7aqGNnbxnsHdLnncm24NfhYxYuEzVZ0Xv77rpB9bH7WGan9w/exec', // <-- вставте URL вебхука
       TELEGRAM: { ENABLED:true, BOT_TOKEN:'8279996038:AAGt-f0lfhlJAyIARqXfsZm7OIQzrBXJ_A4', CHAT_ID:'-4861598462' } // опційно
@@ -899,13 +1021,6 @@ const itemsList = order.items
   }
 }
 
-
-
-
-
-
-
-
         // 3) Якщо оплата карткою — редірект на платіжну сторінку (підключіть бекенд)
         if(order.payment.method==='card'){
           alert('Оплата онлайн: підключіть ендпоінт платежу (LiqPay/Monobank/Stripe). Поки що — післяплата.');
@@ -952,7 +1067,6 @@ function boot(){
 
     boot();
   </script>
-
 <script>
 (function(){
   function initSlider(slider){
@@ -1031,15 +1145,6 @@ function boot(){
 })();
 
 </script>
-
-
-
-
-
-
-
-
-
 <script>
 (function(){
   function bumpCart(){
@@ -1055,9 +1160,6 @@ function boot(){
   window.__cartAnim = { bumpCart };
 })();
 </script>
-
-
-
 <script>
 (function(){
   const btn = document.getElementById('cartBtn');
@@ -1069,27 +1171,20 @@ function boot(){
   }
 })();
 </script>
-
-
-<!-- Requisites Modal -->
-<div id="paymentModal" aria-hidden="true" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px">
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="payTitle" style="background:#fff;max-width:720px;width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
-    <div class="ph" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)">
-      <strong id="payTitle">Оплата замовлення</strong>
-      <div class="spacer" style="flex:1"></div>
-      <button class="btn" id="payClose">✕</button>
-    </div>
-    <div class="pb" id="payBody" style="padding:14px;display:grid;gap:10px;line-height:1.55"></div>
-    <div class="actions" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border)">
-      <button class="btn" id="payOk">Готово</button>
-    </div>
-  </div>
+ Requisites Modal
+<div aria-hidden="true" id="paymentModal" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px">
+<div aria-labelledby="payTitle" aria-modal="true" class="panel" role="dialog" style="background:#fff;max-width:720px;width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
+<div class="ph" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)">
+<strong id="payTitle">Оплата замовлення</strong>
+<div class="spacer" style="flex:1"></div>
+<button class="btn" id="payClose">✕</button>
 </div>
-
-
-
-
-
+<div class="pb" id="payBody" style="padding:14px;display:grid;gap:10px;line-height:1.55"></div>
+<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border)">
+<button class="btn" id="payOk">Готово</button>
+</div>
+</div>
+</div>
 <script>
 (function(){
   // helper shortcuts
@@ -1279,7 +1374,6 @@ function updatePaymentAvailability(){
   }catch(e){}
 })();
 </script>
-
 <script>
 (function(){
   if (window.__filtersInit) return;
@@ -1344,6 +1438,510 @@ function updatePaymentAvailability(){
   applyFilters();
 })();
 </script>
+<!--<div aria-hidden="true" id="prodModalOverlay">-->
+<div aria-labelledby="prodModalTitle" aria-modal="true" class="panel" role="dialog">
+<div class="ph">
+<strong id="prodModalTitle">Опис товару</strong>
+<div class="spacer" style="flex:1"></div>
+<button class="btn" id="prodModalClose" type="button">✕</button>
+</div>
+<div class="pb" id="prodModalBody"></div>
+<div class="actions">
+<button class="btn" id="prodModalOk" type="button">Готово</button>
+</div>
+</div>
+</div>
+<script id="desc-modal-script">
+(function(){
+  function openProductModal(p){
+    var overlay = document.getElementById('prodModalOverlay');
+    if(!overlay) return;
+    var body = document.getElementById('prodModalBody');
+    var title = document.getElementById('prodModalTitle');
+    if(title) title.textContent = p?.name || 'Опис товару';
+    var pf = (typeof priceFor==='function') ? priceFor(p) : {UAH:p?.retailUAH||0, USD:p?.retailUSD||0, mode:'retail'};
+    var html = '';
+    html += '<div class="desc-meta">';
+    if(p?.barcode) html += '<span class="badge">ID: '+String(p.barcode)+'</span>';
+    if(p?.type)    html += '<span class="badge">Тип: '+String(p.type)+'</span>';
+    if(p?.color)   html += '<span class="badge">Колір: '+String(p.color)+'</span>';
+    html += '</div>';
+    html += '<div class="desc-prices">';
+    html += '<span class="pill">Поточна ціна: '+ (typeof fmtUAH==='function'? fmtUAH(pf.UAH) : (pf.UAH + ' грн')) +'</span>';
+    html += '<span class="pill">'+ (typeof fmtUSD==='function'? fmtUSD(pf.USD) : ('$'+pf.USD)) +'</span>';
+    if(p?.retailUAH && p?.wholesaleUAH) html += '<span class="pill">Роздріб: '+ (typeof fmtUAH==='function'? fmtUAH(p.retailUAH) : p.retailUAH+' грн') +'</span><span class="pill">Опт: '+ (typeof fmtUAH==='function'? fmtUAH(p.wholesaleUAH) : p.wholesaleUAH+' грн') +'</span>';
+    html += '</div>';
+    var desc = (p && (p.description || p.desc)) ? String(p.description || p.desc) : 'Опис відсутній. Дані вище містять ключові характеристики товару.';
+    html += '<div>'+desc.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>';
+    if(body) body.innerHTML = html;
+    overlay.style.display = 'flex';
+    setTimeout(function(){ overlay.classList.add('open'); }, 10);
+  }
+  function closeProductModal(){
+    var overlay = document.getElementById('prodModalOverlay');
+    if(!overlay) return;
+    overlay.classList.remove('open');
+    setTimeout(function(){ overlay.style.display='none'; }, 150);
+  }
+  window.__openProductModal = openProductModal;
+  window.__closeProductModal = closeProductModal;
+  // Close handlers
+  document.addEventListener('click', function(e){
+    if(e.target && (e.target.id==='prodModalClose' || e.target.id==='prodModalOk')){
+      closeProductModal();
+    }
+    var overlay = document.getElementById('prodModalOverlay');
+    if(overlay && e.target===overlay){ closeProductModal(); }
+  });
+
+  function productFromCard(card){
+    try{
+      var name = card.querySelector('.name')?.textContent?.trim() || '';
+      var barcode = card.querySelector('.barcode')?.textContent?.trim() || '';
+      var p = Array.isArray(window.CATALOG) ? window.CATALOG.find(function(x){
+        return String(x.name||'').trim()===name && String(x.barcode||'').trim()===barcode;
+      }) : null;
+      return p || null;
+    }catch(e){ return null; }
+  }
+
+  function injectDescButtons(scope){
+    var grid = scope || document.querySelector('#grid');
+    if(!grid) return;
+    grid.querySelectorAll('.card').forEach(function(card, idx){
+      var footer = card.querySelector('.footer');
+      var addBtn = card.querySelector('.footer .add');
+      var spacer = card.querySelector('.footer .spacer');
+      if(!footer || !addBtn || !spacer) return;
+      // If already has our button, skip
+      if(footer.querySelector('.btn.ghost.view')) return;
+      var btn = document.createElement('button');
+      btn.className = 'btn ghost view';
+      btn.type = 'button';
+      btn.textContent ="Опис";
+      var prod = productFromCard(card) || (Array.isArray(window.CATALOG) ? window.CATALOG[idx] : null);
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        if(window.__openProductModal) window.__openProductModal(prod || {});
+      });
+      // Place to the left of spacer, so "Опис" left, "У кошик" right
+      footer.insertBefore(btn, spacer);
+    });
+  }
+
+  // Patch renderGrid to always inject after render
+  (function(){
+    if(typeof renderGrid === 'function' && !window.__renderGridPatched2){
+      var _renderGrid = renderGrid;
+      window.renderGrid = function(list){
+        var res = _renderGrid.call(this, list);
+        try{ injectDescButtons(); }catch(e){}
+        return res;
+      };
+      window.__renderGridPatched2 = true;
+    }
+  })();
+
+  // Inject ASAP after DOM ready, and also after a short delay to catch initial boot()
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      injectDescButtons();
+      setTimeout(injectDescButtons, 50);
+      setTimeout(injectDescButtons, 250);
+    });
+  }else{
+    injectDescButtons();
+    setTimeout(injectDescButtons, 50);
+    setTimeout(injectDescButtons, 250);
+  }
+
+  // Observe grid for dynamic changes
+  var grid = document.getElementById('grid');
+  if(grid){
+    var mo = new MutationObserver(function(){ injectDescButtons(grid); });
+    mo.observe(grid, {childList:true, subtree:true});
+  }
+})();</script><script id="flip-card-script">
+(function(){
+  function productFromCard(card){
+    try{
+      var name = card.querySelector('.name')?.textContent?.trim() || '';
+      var barcode = card.querySelector('.barcode')?.textContent?.trim() || '';
+      var p = Array.isArray(window.CATALOG) ? window.CATALOG.find(function(x){
+        return String(x.name||'').trim()===name && String(x.barcode||'').trim()===barcode;
+      }) : null;
+      return p || null;
+    }catch(e){ return null; }
+  }
+
+  function ensureFlipStructure(card){
+    if(!card || card.querySelector('.flip-inner')) return;
+    var children = Array.from(card.childNodes);
+    var inner = document.createElement('div');
+    inner.className = 'flip-inner';
+    var front = document.createElement('div'); front.className = 'front';
+    var back  = document.createElement('div'); back.className  = 'back';
+
+    // Move all existing content into front
+    children.forEach(function(n){ front.appendChild(n); });
+    // Build back skeleton
+    var head = document.createElement('div'); head.className='desc-head';
+    var title= document.createElement('div'); title.className='title'; head.appendChild(title);
+    back.appendChild(head);
+
+    var meta = document.createElement('div'); meta.className='meta';
+    var t = document.createElement('span'); t.className='type badge'; meta.appendChild(t);
+    var c = document.createElement('span'); c.className='color badge'; meta.appendChild(c);
+    back.appendChild(meta);
+
+    var desc = document.createElement('div'); desc.className='desc-scroll'; desc.setAttribute('data-desc','true'); back.appendChild(desc);
+
+    var actions = document.createElement('div'); actions.className='desc-actions';
+    var backBtn = document.createElement('button'); backBtn.type='button'; backBtn.className='btn back'; backBtn.textContent='← Назад';
+    actions.appendChild(backBtn); back.appendChild(actions);
+
+    inner.appendChild(front); inner.appendChild(back);
+    card.appendChild(inner);
+
+    backBtn.addEventListener('click', function(ev){ ev.stopPropagation(); card.classList.remove('flipped'); });
+  }
+
+  function fillBack(card, p){
+    if(!card || !p) return;
+    var title = card.querySelector('.back .desc-head .title');
+    if(title) title.textContent = p.name || 'Опис товару';
+    var typeB = card.querySelector('.back .meta .type');
+    var colorB= card.querySelector('.back .meta .color');
+    if(typeB) typeB.textContent = p.type || '';
+    if(colorB) colorB.textContent = p.color || '';
+    var descNode = card.querySelector('.back [data-desc="true"]');
+    var desc = (p.description || p.desc || '').trim();
+    if(!desc){
+      var parts = [];
+      if(p.barcode) parts.push('ID: '+p.barcode);
+      if(p.type) parts.push('Тип: '+p.type);
+      if(p.color) parts.push('Колір: '+p.color);
+      if(typeof fmtUAH==='function' && typeof fmtUSD==='function'){
+        if(p.retailUAH) parts.push('Роздріб: ' + fmtUAH(p.retailUAH) + ' • ' + fmtUSD(p.retailUSD||0));
+        if(p.wholesaleUAH) parts.push('Опт: ' + fmtUAH(p.wholesaleUAH) + ' • ' + fmtUSD(p.wholesaleUSD||0));
+      }
+      desc = parts.join('\n');
+    }
+    if(descNode){
+      descNode.innerHTML = String(desc).replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    }
+  }
+
+  function ensureDescButton(card){
+    var footer = card.querySelector('.footer');
+    var spacer = footer ? footer.querySelector('.spacer') : null;
+    if(!footer || !spacer) return;
+    var btn = footer.querySelector('.btn.ghost.view');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.className = 'btn ghost view';
+      btn.type = 'button';
+      btn.textContent = 'Опис';
+      footer.insertBefore(btn, spacer);
+    }
+    if(!btn.__flipWired){
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        ensureFlipStructure(card);
+        var p = productFromCard(card) || {};
+        fillBack(card, p);
+        // set min-height for smoothness equal to front height
+        var front = card.querySelector('.front');
+        if(front){
+// lock height to front via CSS var (--flip-h)
+var front = card.querySelector('.front');
+var inner = card.querySelector('.flip-inner');
+if (front && inner) {
+  const h = Math.ceil(front.scrollHeight || front.getBoundingClientRect().height);
+  card.style.setProperty('--flip-h', h > 0 ? h + 'px' : 'auto');
+}
+card.classList.add('flipped');
+
+        }
+        card.classList.add('flipped');
+      });
+      btn.__flipWired = true;
+    }
+  }
+
+  function enhanceCard(card){
+    ensureDescButton(card);
+  }
+  function enhanceAll(){
+    document.querySelectorAll('#grid .card').forEach(enhanceCard);
+  }
+
+  // Patch renderGrid safely
+  if(typeof renderGrid === 'function' && !window.__flipRenderPatchedSafe){
+    var _render = renderGrid;
+    window.renderGrid = function(list){
+      var res = _render.call(this, list);
+      try{ enhanceAll(); }catch(e){}
+      return res;
+    };
+    window.__flipRenderPatchedSafe = true;
+  }
+
+  // Initial + observe
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(enhanceAll, 60);
+      setTimeout(enhanceAll, 200);
+    });
+  }else{
+    setTimeout(enhanceAll, 60);
+    setTimeout(enhanceAll, 200);
+  }
+  var grid = document.getElementById('grid');
+  if(grid){
+    var mo = new MutationObserver(function(){ enhanceAll(); });
+    mo.observe(grid, {childList:true, subtree:true});
+  }
+})();</script>
+<script id="add-flip-back-btn-script">
+(function(){
+  function ensureBackButtons(root){
+    try{
+      var cards = (root || document).querySelectorAll('.card');
+      cards.forEach(function(card){
+        var back = card.querySelector('.back');
+        if(!back) return; // nothing to do if there is no back side
+        var existing = back.querySelector('.btn.back, .flip-back, [data-action="flip-back"]');
+        if(!existing){
+          var actions = back.querySelector('.desc-actions') || back;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn back';
+          btn.setAttribute('data-action','flip-back');
+          btn.textContent = '← Назад';
+          // Prefer to insert at start of .desc-actions, otherwise append to back
+          if(actions.firstChild) actions.insertBefore(btn, actions.firstChild);
+          else actions.appendChild(btn);
+        }
+      });
+      // wire events
+      (root || document).querySelectorAll('.card .back [data-action="flip-back"]').forEach(function(b){
+        if(b.__wiredFlipBack) return;
+        b.__wiredFlipBack = true;
+        b.addEventListener('click', function(e){
+          var card = e.target.closest('.card');
+          if(card) card.classList.remove('flipped');
+          e.stopPropagation();
+        });
+      });
+    }catch(e){ /* silent */ }
+  }
+
+  // Run once on DOM ready
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ ensureBackButtons(); });
+  }else{
+    ensureBackButtons();
+  }
+
+  // If app exposes renderGrid, patch it to run our enhancer after rendering
+  try{
+    if(typeof renderGrid === 'function' && !window.__patchedRenderGridForBackBtn){
+      window.__patchedRenderGridForBackBtn = true;
+      var _renderGrid = renderGrid;
+      window.renderGrid = function(){
+        var res = _renderGrid.apply(this, arguments);
+        try{ ensureBackButtons(document.getElementById('grid')); }catch(_){}
+        return res;
+      }
+    }
+  }catch(e){}
+
+  // Observe grid for new cards dynamically
+  try{
+    var grid = document.getElementById('grid') || document.querySelector('.container, [data-grid="products"]');
+    if(grid){
+      var mo = new MutationObserver(function(){ ensureBackButtons(grid); });
+      mo.observe(grid, { childList:true, subtree:true });
+    }
+  }catch(e){}
+})();
+</script>
+
+
+
+    <script>
+      (function(){
+        function addBackButtons(root) {
+          if(!root || !root.querySelectorAll) return;
+          root.querySelectorAll('.card').forEach(function(card){
+            var back = card.querySelector('.back');
+            if(!back) return;
+            if(!back.querySelector('.flip-back-btn')) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'flip-back-btn';
+              btn.textContent = '\u2190 Назад';
+              back.prepend(btn);
+            }
+          });
+        }
+
+        // Initial pass
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function(){ addBackButtons(document); });
+        } else {
+          addBackButtons(document);
+        }
+
+        // Watch for dynamically created cards/backs
+        var mo = new MutationObserver(function(muts){
+          muts.forEach(function(m){
+            m.addedNodes && m.addedNodes.forEach(function(n){
+              if(n && n.nodeType === 1) {
+                // element
+                addBackButtons(n);
+              }
+            });
+          });
+        });
+        try { mo.observe(document.body, { childList: true, subtree: true }); } catch(e) { /* no-op */ }
+
+        // Delegate click: flip back
+        document.addEventListener('click', function(ev){
+          var btn = ev.target && ev.target.closest ? ev.target.closest('.flip-back-btn') : null;
+          if(btn) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            var card = btn.closest('.card');
+            if(card) {
+              card.classList.remove('flipped');
+            }
+          }
+        }, true);
+      })();
+    </script>
+    <!-- flip-back-btn-patch -->
+
+
+    <!-- global-flip-back-patch -->
+    <style>
+      #global-flip-back {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 99999;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        cursor: pointer;
+        background: rgba(0,0,0,0.08);
+        backdrop-filter: blur(2px);
+        display: none;
+      }
+      body.has-flipped #global-flip-back { display: inline-block; }
+    </style>
+    <button id="global-flip-back" type="button">← Назад</button>
+    <script>
+      (function(){
+        var lastFlipped = null;
+        function updateState() {
+          var flipped = document.querySelectorAll('.card.flipped');
+          document.documentElement.classList.toggle('has-flipped', flipped.length>0);
+          // try pick the most recently flipped card if we don't have one
+          if(!lastFlipped || !lastFlipped.isConnected || !lastFlipped.classList.contains('flipped')) {
+            lastFlipped = flipped[flipped.length-1] || null;
+          }
+        }
+        // Watch for class changes and DOM changes
+        var mo = new MutationObserver(function(muts){
+          var needs = false;
+          muts.forEach(function(m){
+            if(m.type === 'attributes' && m.attributeName === 'class' && m.target.matches && m.target.matches('.card')) needs = true;
+            if(m.addedNodes && m.addedNodes.length) needs = true;
+            if(m.removedNodes && m.removedNodes.length) needs = true;
+          });
+          if(needs) updateState();
+        });
+        try { mo.observe(document.body, { subtree:true, childList:true, attributes:true, attributeFilter:['class'] }); } catch(e){}
+        // initial
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', updateState);
+        } else {
+          updateState();
+        }
+        // capture flips when clicking "Опис" or anything that toggles .flipped
+        document.addEventListener('click', function(e){
+          // heuristics: after the event loop tick, update
+          setTimeout(updateState, 0);
+        }, true);
+        // Back button logic
+        var btn = document.getElementById('global-flip-back');
+        if(btn) btn.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          var target = lastFlipped || document.querySelector('.card.flipped');
+          if(target) target.classList.remove('flipped');
+          // also remove from any others if multiple are flipped
+          document.querySelectorAll('.card.flipped').forEach(function(c){ c.classList.remove('flipped'); });
+          updateState();
+        }, true);
+        // Also support ESC key
+        document.addEventListener('keydown', function(e){
+          if(e.key === 'Escape') {
+            var any = document.querySelector('.card.flipped');
+            if(any) {
+              e.preventDefault();
+              document.querySelectorAll('.card.flipped').forEach(function(c){ c.classList.remove('flipped'); });
+              updateState();
+            }
+          }
+        });
+      })();
+    </script>
+    <!-- global-flip-back-patch -->
+<script>
+document.addEventListener('click', function(e){
+  // Перевіряємо, чи клік був усередині зворотного боку картки
+  const back = e.target.closest('.card.flipped .back');
+  if(back){
+    const card = back.closest('.card');
+    if(card){
+      card.classList.remove('flipped');
+      e.stopPropagation();
+    }
+  }
+}, true);
+</script>
+
+// === Flip height locker: keeps card height equal to the front side ===
+function lockFlipSize(card){
+  // якщо ти використовуєш .front/.back, беремо .front, інакше - саму картку
+  const front = card.querySelector('.front') || card;
+
+  const measure = () => {
+    // scrollHeight краще, якщо всередині є контент/зображення
+    const h = Math.ceil(front.scrollHeight);
+    card.style.setProperty('--flip-h', h > 0 ? h + 'px' : 'auto');
+  };
+
+  // первинний розрахунок
+  measure();
+
+  // оновлюємо при зміні розміру картки/вікна
+  const ro = new ResizeObserver(() => measure());
+  ro.observe(front);
+  ro.observe(card);
+
+  // якщо на фронті є зображення — після їх завантаження теж переміряємо
+  card.querySelectorAll('img').forEach(img => {
+    if (!img.complete) img.addEventListener('load', measure, { once: true });
+  });
+
+  // запасний варіант на глобальний ресайз
+  window.addEventListener('resize', measure, { passive: true });
+}
+
 
 </body>
 </html>
