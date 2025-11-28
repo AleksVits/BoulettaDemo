@@ -6,7 +6,6 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Bouletta — інтернет‑магазин</title>
 <meta content="Шкіряні сумки та аксесуари Bouletta. Офіційний каталог, швидка доставка, безпечна оплата." name="description"/>
-<!-- Fonts -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
@@ -24,9 +23,17 @@
     .spacer{flex:1}
     .btn{appearance:none;border:1px solid var(--border);background:#fff;color:var(--accent);padding:10px 14px;border-radius:12px;font-weight:650;cursor:pointer;line-height:1}
     .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;border-radius:10px;transition:background-color .25s,box-shadow .25s,transform .2s}
-    .btn.primary:hover{background:#1e4fd9;box-shadow:0 6px 14px rgba(37,99,235,.25);transform:translateY(-1px)}
-    .btn.primary:active{background:#1b46c7;transform:none;box-shadow:0 2px 8px rgba(37,99,235,.2)}
-    .btn.icon{display:inline-flex;gap:8px;align-items:center}
+    .btn.primary:hover{
+      background:#1e4fd9;
+      box-shadow:0 6px 14px rgba(37,99,235,.25);
+      transform:translateY(-1px);
+    }
+    .btn.primary:active{
+      background:#1b46c7;
+      transform:none;
+      box-shadow:0 2px 8px rgba(37,99,235,.2);
+    }
+     .btn.icon{display:inline-flex;gap:8px;align-items:center}
 
     .toolbar{display:grid;gap:10px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);grid-template-columns:1fr 1fr 1fr}
     @media(max-width:1100px){.toolbar{grid-template-columns:1fr 1fr}}
@@ -339,94 +346,148 @@ label.field.err .input{
 .desc-meta{ display:flex; flex-wrap:wrap; gap:8px; }
 .desc-meta .badge{ background:#f8fafc }
 .desc-prices{ display:flex; flex-wrap:wrap; gap:8px; }
-</style><style id="flip-card-styles">
+</style>
+<style id="flip-card-styles">
 /* === Flip card for product description (safe version) === */
-.card{ perspective:1000px; --flip-h: auto;}
+.card{
+  perspective:1000px;
+  --flip-h:auto;
+}
+
 .card .flip-inner{
   position:relative;
   transform-style:preserve-3d;
-  transition: transform .5s ease;
-  width: 100%;
-  min-height: var(--flip-h);
-  height: var(--flip-h);
-  will-change: transform;
-  transition: transform .44s cubic-bezier(.22,.61,.36,1);
-  transform-origin: center center; /* стабільний “шарнір” */
-<!--  backface-visibility: hidden;-->
-  -webkit-backface-visibility: hidden;
+  width:100%;
+  min-height:var(--flip-h);
+  height:var(--flip-h);
+  will-change:transform;
+  transition:transform .44s cubic-bezier(.22,.61,.36,1);
+  transform-origin:center center; /* стабільний “шарнір” */
 }
 
-.product-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* розтягує елементи по вертикалі */
+.product-card{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
 
-.product-info {
-  margin-top: auto; /* притискає блок вниз */
+.product-info{
+  margin-top:auto;
 }
 
-.card.flipped .flip-inner{ transform: rotateY(180deg); }
+.card.flipped .flip-inner{
+  transform:rotateY(180deg);
+}
 
-.card .front, .card .back{
-  position:absolute; inset:0;
+.card .front,
+.card .back{
+  position:absolute;
+  inset:0;
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
-  display:flex; flex-direction:column;
-  position: absolute;
-  inset: 0;
-  height: 100%;
+  display:flex;
+  flex-direction:column;
+  height:100%;
 }
-.card .front{ z-index:2; }
+
+.card .front{
+  z-index:2;
+}
+
 .card .back{
-  transform: rotateY(180deg);
-  background: var(--card,#fff);
+  transform:rotateY(180deg);
+  background:var(--card,#fff);
   border-radius:16px;
   padding:12px;
   gap:10px;
   overflow:auto;
 }
-.desc-head{ display:flex; gap:8px; align-items:center; }
-.desc-head .title{ font-weight:800; line-height:1.25; }
-.desc-scroll{ flex:1 1 auto; min-height:0; overflow:auto; border:1px solid var(--border); border-radius:12px; padding:10px; background:#fafafa; }
-.desc-actions{ display:flex; gap:8px; align-items:center; }
-.btn.back{ background:#fff; border:1px solid var(--border); border-radius:12px; }
-.btn.back:hover{ background:#f9fafb }
+
+.desc-head{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.desc-head .title{
+  font-weight:800;
+  line-height:1.25;
+}
+
+.desc-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+  background:#fafafa;
+}
+
+.desc-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.btn.back{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+
+.btn.back:hover{
+  background:#f9fafb;
+}
 
 @media (max-width:560px){
   .card .flip-inner{
-    min-height: var(--flip-h);
+    min-height:var(--flip-h);
   }
 }
 
-/* Keep both sides equal to front height */
-.card { --flip-h: auto; }
-
-.card .flip-inner{
-  width: 100%;
-  height: var(--flip-h);
-  min-height: var(--flip-h);
+/* обидві сторони займають однакову висоту контейнера */
+.card{
+  --flip-h:auto;
 }
 
-/* обидві сторони займають однакову висоту контейнера */
-.card .front,
-.card .back{
-  height: 100%;
+.card .flip-inner{
+  width:100%;
+  height:var(--flip-h);
+  min-height:var(--flip-h);
 }
 
 /* бек скролиться всередині, не впливає на розмір картки */
 .card .back{
-  overflow: auto;
-}
-button.desc-toggle img.desc-icon {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  display: block;
+  overflow:auto;
 }
 
+button.desc-toggle img.desc-icon{
+  width:28px;
+  height:28px;
+  object-fit:contain;
+  display:block;
+}
+</style>
+<style>
+      #global-flip-back {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 99999;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        cursor: pointer;
+        background: rgba(0,0,0,0.08);
+        backdrop-filter: blur(2px);
+        display: none;
+      }
+      body.has-flipped #global-flip-back { display: inline-block; }
+    </style>
+</head>
 
-</style></head>
 <body>
 <header>
 <h1>Bouletta — каталог</h1>
@@ -434,6 +495,7 @@ button.desc-toggle img.desc-icon {
 <button class="btn" id="resetBtn">Скинути фільтр</button>
 <button class="btn icon" id="cartBtn">Кошик (<span id="cartCount">0</span>)</button>
 </header>
+
 <section class="toolbar">
 <div>
 <div class="label">Тип товару</div>
@@ -455,27 +517,37 @@ button.desc-toggle img.desc-icon {
 </select>
 </div>
 </section>
+
 <section class="toolbar" style="border-top:0">
-<div>
-<div class="label">Курс USD → UAH</div>
-<div class="row" style="display:flex;gap:8px;align-items:center">
-<input class="input" id="rateInput" inputmode="decimal" placeholder="Напр.: 41.00" style="max-width:150px"/>
-<button class="btn" id="btnUpdateRate">Оновити (НБУ)</button>
-</div>
-<small class="hint" id="rateInfo">Поточний курс: 41.00</small>
-</div>
-<div>
-<div class="label">Експорт</div>
-<div class="row" style="display:flex;gap:8px;align-items:center">
-<button class="btn" id="exportXLSX">Excel</button>
-</div>
-<small class="hint">Експорт поточно відфільтрованих товарів</small>
-</div>
-<div>
-<input id="promo" style="display:none"/>
-</div>
+  <div>
+    <div class="label">Курс USD → UAH</div>
+    <div class="row" style="display:flex;gap:8px;align-items:center">
+      <input class="input" id="rateInput" inputmode="decimal" placeholder="Напр.: 41.00" style="max-width:150px">
+      <button class="btn" id="btnUpdateRate">Оновити (НБУ)</button>
+    </div>
+    <small class="hint" id="rateInfo">Поточний курс: 41.00</small>
+  </div>
+
+  <div>
+    <div class="label">Експорт</div>
+    <div class="row" style="display:flex;gap:8px;align-items:center">
+      <button class="btn" id="exportXLSX">Excel</button>
+    </div>
+    <small class="hint">Експорт поточно відфільтрованих товарів</small>
+  </div>
+
+  <div>
+    <div class="label">Промокод</div>
+    <div class="row" style="display:flex;gap:8px;align-items:center">
+      <input class="input" id="promo" placeholder="Напр.: BOULETTA5" style="max-width:160px">
+      <span id="promoState" class="hint tag">не застосовано</span>
+    </div>
+<!--    <small class="hint">Діють коди WELCOME5, VIP10</small>-->
+  </div>
 </section>
+
 <div class="status" id="status"></div>
+
 <section class="container" id="grid"></section>
 <!-- Кошик -->
 <aside id="cart">
@@ -513,6 +585,7 @@ button.desc-toggle img.desc-icon {
 </div>
 <small class="hint">Позначені * поля — обов’язкові.</small>
 </div>
+
 <!-- КРОК 2: Доставка -->
 <div class="step">
 <h4>2) Доставка</h4>
@@ -525,11 +598,13 @@ button.desc-toggle img.desc-icon {
 <option value="pickup">Самовивіз</option>
 </select>
 </label>
+
 <label class="field"><span>Місто*</span><input class="input" id="fCity" placeholder="Київ" required=""/></label>
 <label class="field"><span>Відділення/Адреса*</span><input class="input" id="fAddress" placeholder="№ відділення або адреса" required=""/></label>
 <div></div>
 </div>
 </div>
+
 <!-- КРОК 3: Оплата та підтвердження -->
 <div class="step">
 <h4>3) Оплата</h4>
@@ -554,6 +629,7 @@ button.desc-toggle img.desc-icon {
 </div>
 </div>
 </section>
+
 <template id="cardTpl"><article class="card">
 <div class="media"><div class="slider"><div class="slides"></div></div></div>
 <div class="body">
@@ -571,63 +647,27 @@ button.desc-toggle img.desc-icon {
 </div>
 </article></template>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+<div aria-hidden="true" id="prodModalOverlay">
+  <div aria-labelledby="prodModalTitle" aria-modal="true" class="panel" role="dialog">
+    <div class="ph">
+      <strong id="prodModalTitle">Опис товару</strong>
+      <div class="spacer" style="flex:1"></div>
+      <button class="btn" id="prodModalClose" type="button">✕</button>
+    </div>
+    <div class="pb" id="prodModalBody"></div>
+    <div class="actions">
+      <button class="btn" id="prodModalOk" type="button">Готово</button>
+    </div>
+  </div>
+</div>
 
-    // === Required validation & mask ===
-(function(){
-  const ids=['fName','fPhone','fCity','fAddress'];
-  const $=id=>document.getElementById(id);
-  const submitState=document.getElementById('submitState');
-  function mark(el,bad){ if(!el) return; if(bad){ el.classList.add('err'); el.closest('label')?.classList?.add('err'); } else { el.classList.remove('err'); el.closest('label')?.classList?.remove('err'); } }
-  function check(){
-    let ok=true;
-    ids.forEach(id=>{
-      const el=$(id); if(!el) return;
-      let valid=!!el.value && el.value.trim().length>=2;
-      if(id==='fPhone') valid=/^\+380\d{9}$/.test((el.value||'').trim());
-      mark(el,!valid); ok=ok && valid;
-    });
-    if(!ok && submitState) submitState.textContent='Перевірте обов’язкові поля. Телефон у форматі +380XXXXXXXXX';
-    if(ok && submitState && submitState.textContent) submitState.textContent='';
-    return ok;
-  }
-  // clear on input
-  ids.forEach(id=>{ const el=$(id); if(!el) return; ['input','change','blur'].forEach(ev=>{ el.addEventListener(ev,()=>{ if(el.classList.contains('err')){ let valid=!!el.value && el.value.trim().length>=2; if(id==='fPhone') valid=/^\+380\d{9}$/.test((el.value||'').trim()); mark(el,!valid); if(valid && submitState) submitState.textContent=''; } }); }); });
-  // phone mask
-  const phone=$('fPhone'); if(phone){ const fmt=()=>{ let v=phone.value.replace(/[^\d+]/g,''); if(!v.startsWith('+')) v='+'+v.replace(/^\+/, ''); if(v==='+'||v==='+3'||v==='+38') v='+380'; v=v.slice(0,13); phone.value=v; }; phone.addEventListener('input',fmt); if(!phone.value) phone.value='+380'; }
-  window.__validateRequiredAndHighlight=check;
-})();
+<button id="global-flip-back" type="button">← Назад</button>
 
+<!-- Підключаємо бібліотеку XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-// === Requisites modal controller ===
-(function(){
-  const modal=document.getElementById('paymentModal');
-  const body=document.getElementById('payBody')||document.querySelector('#paymentModal .pb');
-  const closeBtn=document.getElementById('payClose');
-  const okBtn=document.getElementById('payOk');
-  function open(){
-    if(body){ body.innerHTML=[
-      '<div><strong>Реквізити для оплати:</strong></div>',
-      'ФОП Курт Махмут Фират',
-      'IBAN: <code>UA713220010000026006350089361</code>',
-      'ІПН/ЄДРПОУ: <code>2938328518</code>',
-      'МФО: <code>322001</code>',
-      'ЄДРПОУ Банку: <code>21133352</code>',
-      '<br>',
-      '❗️В додатках банків або терміналах потрібно обрати платіж за IBAN або за реквізитами.',
-      '❗️В призначенні платежу вкажіть ваше прізвище та ім’я.',
-      '<br>',
-      'Після оплати надішліть квитанцію менеджену в Instagram ❤️'
-    ].map(s=>`<div class="row">${s}</div>`).join(''); }
-    if(modal){ modal.style.display='flex'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
-  }
-  function close(){ if(modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); modal.style.display='none'; } }
-  if(closeBtn) closeBtn.onclick=close; if(okBtn) okBtn.onclick=close;
-  window.__openRequisitesMessage=open;
-})();
-
-</script>
 <script src="products.js"></script>
+
 <script>
 // Нормалізація каталогу: створюємо CATALOG без зміни const products
 (function(){
@@ -635,23 +675,24 @@ button.desc-toggle img.desc-icon {
   try{
     if (Array.isArray(window.products)) base = window.products;
     else if (typeof products !== 'undefined' && Array.isArray(products)) base = products;
-  }catch(e){ base = []; }
+  }catch(e){
+    base = [];
+  }
 
   window.CATALOG = base.map(p => ({
-    ...p, // ← важливо! було .p (помилка)
+    ...p, // ← правильно: розгортаємо вихідний об’єкт
     barcode: String(p?.barcode ?? '').trim(),
     name:    String(p?.name ?? '').trim(),
     type:    p?.type  ? String(p.type).trim()  : '',
     color:   p?.color ? String(p.color).trim() : '',
     imgs:    Array.isArray(p?.imgs) ? p.imgs.filter(Boolean) : [],
-    // гарантуємо опис
+    // гарантуємо текст опису
     description: (typeof p?.description === 'string' && p.description.trim())
                  ? p.description
                  : (typeof p?.desc === 'string' ? p.desc : '')
   }));
 })();
 </script>
-
 
 <script>
     /* =================== CONFIG =================== */
@@ -662,10 +703,7 @@ button.desc-toggle img.desc-icon {
       APPS_SCRIPT_WEBHOOK: 'https://script.google.com/macros/s/AKfycbwLb1Hmyb5HZPfutet7aqGNnbxnsHdLnncm24NfhYxYuEzVZ0Xv77rpB9bH7WGan9w/exec', // <-- вставте URL вебхука
       TELEGRAM: { ENABLED:true, BOT_TOKEN:'8279996038:AAGt-f0lfhlJAyIARqXfsZm7OIQzrBXJ_A4', CHAT_ID:'-4861598462' } // опційно
     };
-    const productsContainer = document.getElementById('products');
 
-
-    // ==== СТАН
     let state = {
       rate: CONFIG.RATE,
       items: [], // відфільтровані
@@ -673,10 +711,9 @@ button.desc-toggle img.desc-icon {
       promo: null
     };
 
-    // ==== УТИЛІТИ
     const fmtUAH = v => (Math.round(v).toLocaleString('uk-UA')+ ' грн');
     const fmtUSD = v => ('$' + (Math.round(v*100)/100).toFixed(2));
-    // ==== ОПТОВЕ ЦІНОУТВОРЕННЯ
+
     const WHOLESALE_THRESHOLD_USD = 500;
     function wholesaleActive(){
       const retailUSD = state.cart.reduce((s,i)=> s + i.qty * (i.retailUSD ?? i.priceUSD ?? 0), 0);
@@ -700,7 +737,7 @@ button.desc-toggle img.desc-icon {
     const round2 = v => Math.round(v*100)/100;
     const el = sel => document.querySelector(sel);
 
-    // ==== РЕНДЕР КАРТОК
+
     const grid = el('#grid');
     const tpl = el('#cardTpl');
 
@@ -732,7 +769,7 @@ grid.appendChild(node);
       });
     }
 
-    // ==== ФІЛЬТРИ / СОРТ
+
     const typeSel = el('#typeSel');
     const colorSel = el('#colorSel');
     const sortSel = el('#sort');
@@ -759,7 +796,7 @@ grid.appendChild(node);
       colorSel.innerHTML = '<option value="">Всі</option>' + colors.map(v=>`<option>${v}</option>`).join('');
     }
 
-    // ==== Курс валют
+
     const rateInput = el('#rateInput'); const rateInfo = el('#rateInfo');
     rateInput.value = state.rate;
     el('#btnUpdateRate').addEventListener('click', async()=>{
@@ -780,7 +817,7 @@ grid.appendChild(node);
       renderCart();
     }
 
-    // ==== КОШИК
+
     const cartBtn = el('#cartBtn'); const cart = el('#cart');
     const cartCount = el('#cartCount'); const cartList = el('#cartList');
 
@@ -843,10 +880,13 @@ function addToCart(p){
         row.querySelector('[data-del]').onclick = ()=>{ state.cart = state.cart.filter(x=>x.lineId!==item.lineId); saveCart(); renderCart(); refreshCartBadge(); };
         cartList.appendChild(row);
       });
-      const {sumUAH,sumUSD,qty} = cartTotals();
+            const {sumUAH,sumUSD,qty} = cartTotals();
       el('#cartTotal').textContent = `${fmtUAH(sumUAH)} • ${fmtUSD(sumUSD)}`;
       el('#ckItems').textContent = `${qty} товарів`;
       el('#ckTotal').textContent = fmtUAH(applyPromo(sumUAH));
+
+      // Один раз рахуємо, чи активний опт
+      const isWholesale = wholesaleActive();
 
       // Показати/сховати позначку "Опт застосовано"
       const flagId = 'wholesaleFlag';
@@ -858,8 +898,8 @@ function addToCart(p){
         flag.className = 'wholesale-flag';
         foot.insertBefore(flag, foot.firstChild);
       }
-      flag.textContent = wholesaleActive() ? 'Опт застосовано: ціни за оптом' : '';
-      flag.style.display = wholesaleActive() ? 'flex' : 'none';
+      flag.textContent = isWholesale ? 'Опт застосовано: ціни за оптом' : '';
+      flag.style.display = isWholesale ? 'flex' : 'none';
 
       // Аналогічна підказка у чекауті
       const nId = 'ckWholesaleNote';
@@ -871,8 +911,8 @@ function addToCart(p){
         const step3 = document.querySelector('#checkout .step:nth-of-type(3)');
         step3 && step3.appendChild(note);
       }
-      note.textContent = wholesaleActive() ? 'Застосовано оптові ціни (поріг $500 перевищено)' : '';
-      note.style.display = wholesaleActive() ? 'block' : 'none';
+      note.textContent = isWholesale ? 'Застосовано оптові ціни (поріг $500 перевищено)' : '';
+      note.style.display = isWholesale ? 'block' : 'none';
     }
 
     el('#cartClear').onclick = ()=>{ state.cart=[]; saveCart(); renderCart(); refreshCartBadge(); };
@@ -880,7 +920,7 @@ function addToCart(p){
     function openCart(){ cart.classList.add('open'); document.body.classList.add('cart-open'); }
     function closeCart(){ cart.classList.remove('open'); document.body.classList.remove('cart-open'); }
 
-    // ==== ПРОМОКОД
+
     const promoBadge = el('#promoState'); const promoInput = el('#promo');
     promoInput.addEventListener('change',()=>{ state.promo = promoInput.value.trim().toUpperCase()||null; renderCart(); updatePromoBadge(); });
     function updatePromoBadge(){
@@ -890,7 +930,7 @@ function addToCart(p){
     }
     function applyPromo(sum){ const p = state.promo && CONFIG.PROMOCODES[state.promo]; return p ? Math.round(sum*(1-p)) : sum; }
 
-    // ==== ЧЕКАУТ
+
     const checkout = el('#checkout');
     el('#checkoutBtn').onclick = ()=>{ closeCart && closeCart(); openCheckout && openCheckout(); };
     el('#closeCheckout').onclick = ()=> closeCheckout();
@@ -905,32 +945,44 @@ function addToCart(p){
     function closeCheckout(){ checkout.classList.remove('open'); checkout.setAttribute('aria-hidden','true'); }
     function openCheckoutWithItem(p){ addToCart(p); openCheckout(); }
 
-    // Підтвердження замовлення
-    el('#placeOrderBtn').onclick = async()=>{
-      if(window.__validateRequiredAndHighlight && !window.__validateRequiredAndHighlight()) return;
-      const {sumUAH,sumUSD,qty} = cartTotals();
-      if(qty===0){ alert('Додайте товари у кошик'); return; }
+// Підтвердження замовлення
+el('#placeOrderBtn').onclick = async()=>{
+  const {sumUAH,sumUSD,qty} = cartTotals();
+  if(qty===0){
+    alert('Додайте товари у кошик');
+    return;
+  }
 
-      const order = {
-        id: 'B' + Date.now(),
-        createdAt: new Date().toISOString(),
-        customer: { name:el('#fName').value.trim(), phone:el('#fPhone').value.trim(), email:el('#fEmail').value.trim(), note:el('#fNote').value.trim() },
-        shipping: { method:el('#fShip').value, city:el('#fCity').value.trim(), address:el('#fAddress').value.trim() },
-        payment: { method:el('#fPay').value },
-        promo: state.promo || '',
-        currency: { rate: state.rate },
-       items: state.cart.map(i => ({
-  name: i.name,
-  type: i.type,            // ← важливо
-  color: i.color,          // ← важливо
-  barcode: i.barcode,
-  priceUAH: i.priceUAH,
-  priceUSD: i.priceUSD,
-  qty: i.qty
-})),
+  const order = {
+    id: 'B' + Date.now(),
+    createdAt: new Date().toISOString(),
+    customer: {
+      name: el('#fName').value.trim(),
+      phone: el('#fPhone').value.trim(),
+      email: el('#fEmail').value.trim(),
+      note:  el('#fNote').value.trim()
+    },
+    shipping: {
+      method: el('#fShip').value,
+      city:   el('#fCity').value.trim(),
+      address:el('#fAddress').value.trim()
+    },
+    payment: { method: el('#fPay').value },
+    promo: state.promo || '',
+    currency: { rate: state.rate },
+    items: state.cart.map(i => ({
+      name: i.name,
+      type: i.type,
+      color: i.color,
+      barcode: i.barcode,
+      priceUAH: i.priceUAH,
+      priceUSD: i.priceUSD,
+      qty: i.qty
+    })),
+    totals: { qty, sumUAH: applyPromo(sumUAH), sumUSD }
+  };
 
-        totals: { qty, sumUAH: applyPromo(sumUAH), sumUSD }
-      };
+
 
       // Валідація
       if(!order.customer.name || !order.customer.phone || !order.shipping.city || !order.shipping.address){
@@ -981,10 +1033,15 @@ const itemsList = order.items
   .join('\n');
 
 
-  // Формуємо спосіб оплати
-  const paymentMethod = order.payment?.method === 'card'
-    ? '💳 Оплата на картку'
-    : '💵 Післяплата';
+    // Формуємо спосіб оплати
+    let paymentMethod = '💵 Оплата при отриманні';
+
+    if (order.payment?.method === 'prepay') {
+      paymentMethod = '💳 Передоплата 200 грн';
+    } else if (order.payment?.method === 'full') {
+      paymentMethod = '💳 Повна оплата';
+    }
+
 
   // Повідомлення для Telegram
   const text = [
@@ -1036,7 +1093,7 @@ const itemsList = order.items
       }
     };
 
-    // ==== ЕКСПОРТ У EXCEL
+
     el('#exportXLSX').onclick = ()=>{
       const rows = state.items.map(p=> ({
         Назва:p.name, Штрихкод:p.barcode, Тип:p.type, Колір:p.color,
@@ -1050,7 +1107,6 @@ const itemsList = order.items
       XLSX.writeFile(wb, 'catalog.xlsx');
     };
 
-    // ==== ІНІТ
     el('#resetBtn').onclick = ()=>{ typeSel.value=''; colorSel.value=''; sortSel.value='name-asc'; applyFilters(); };
 
 function boot(){
@@ -1067,6 +1123,7 @@ function boot(){
 
     boot();
   </script>
+
 <script>
 (function(){
   function initSlider(slider){
@@ -1145,6 +1202,7 @@ function boot(){
 })();
 
 </script>
+
 <script>
 (function(){
   function bumpCart(){
@@ -1160,6 +1218,7 @@ function boot(){
   window.__cartAnim = { bumpCart };
 })();
 </script>
+
 <script>
 (function(){
   const btn = document.getElementById('cartBtn');
@@ -1171,20 +1230,7 @@ function boot(){
   }
 })();
 </script>
- Requisites Modal
-<div aria-hidden="true" id="paymentModal" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px">
-<div aria-labelledby="payTitle" aria-modal="true" class="panel" role="dialog" style="background:#fff;max-width:720px;width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
-<div class="ph" style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)">
-<strong id="payTitle">Оплата замовлення</strong>
-<div class="spacer" style="flex:1"></div>
-<button class="btn" id="payClose">✕</button>
-</div>
-<div class="pb" id="payBody" style="padding:14px;display:grid;gap:10px;line-height:1.55"></div>
-<div class="actions" style="display:flex;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border)">
-<button class="btn" id="payOk">Готово</button>
-</div>
-</div>
-</div>
+
 <script>
 (function(){
   // helper shortcuts
@@ -1326,7 +1372,7 @@ function updatePaymentAvailability(){
           '❗️В додатках банків або терміналах потрібно обрати платіж за IBAN або за реквізитами.',
           '❗️В призначенні платежу вкажіть ваше прізвище та ім’я.',
           '<br>',
-          'Після оплати надішліть квитанцію менеджену в Instagram ❤️'
+          'Після оплати надішліть квитанцію менеджеру в Instagram ❤️'
         ].map(s=>`<div class="row">${s}</div>`).join('');
       }
       if(modal){
@@ -1374,194 +1420,8 @@ function updatePaymentAvailability(){
   }catch(e){}
 })();
 </script>
-<script>
-(function(){
-  if (window.__filtersInit) return;
-  window.__filtersInit = true;
 
-  function qs(id){ return document.getElementById(id); }
-  const typeSel = qs('typeFilter') || document.querySelector('[name="type"], select[data-filter="type"]');
-  const colorSel= qs('colorFilter')|| document.querySelector('[name="color"], select[data-filter="color"]');
-  const sortSel = qs('sortFilter') || document.querySelector('[name="sort"],  select[data-filter="sort"]');
-  const grid    = qs('productGrid') || document.querySelector('[data-grid="products"], .product-grid, #grid');
-
-  if (!grid) return;
-  const cards = Array.from(grid.querySelectorAll('.product-card, [data-product="card"]'));
-
-  function applyFilters(){
-    const t = (typeSel && typeSel.value) ? typeSel.value.trim().toLowerCase() : '';
-    const c = (colorSel && colorSel.value)? colorSel.value.trim().toLowerCase(): '';
-    const s = (sortSel && sortSel.value) ? sortSel.value : '';
-
-    // Filter show/hide
-    cards.forEach(el => {
-      const et = (el.getAttribute('data-type')  || '').toLowerCase();
-      const ec = (el.getAttribute('data-color') || '').toLowerCase();
-      const okType = !t || et === t || et.split(',').includes(t);
-      const okColor= !c || ec === c || ec.split(',').includes(c);
-      el.style.display = (okType && okColor) ? '' : 'none';
-    });
-
-    // Sorting (by price|name or DOM original)
-    let visible = cards.filter(el => el.style.display !== 'none');
-    let sorted = visible.slice();
-    if (s === 'price-asc' || s === 'price-desc'){
-      sorted.sort((a,b)=>{
-        const pa = parseFloat(a.getAttribute('data-price')||a.dataset.price||0);
-        const pb = parseFloat(b.getAttribute('data-price')||b.dataset.price||0);
-        return (s==='price-asc') ? (pa - pb) : (pb - pa);
-      });
-    } else if (s === 'name-asc' || s === 'name-desc'){
-      sorted.sort((a,b)=>{
-        const na = (a.getAttribute('data-name')||'').toLowerCase();
-        const nb = (b.getAttribute('data-name')||'').toLowerCase();
-        return (s==='name-asc') ? na.localeCompare(nb) : nb.localeCompare(na);
-      });
-    } else {
-      // no sort -> keep DOM order
-      sorted = visible;
-    }
-
-    // Re-append in chosen order
-    sorted.forEach(el => grid.appendChild(el));
-  }
-
-  // Wire once (if elements exist)
-  [typeSel, colorSel, sortSel].forEach(sel => {
-    if (sel && !sel.__wired){
-      sel.addEventListener('change', applyFilters);
-      sel.__wired = true;
-    }
-  });
-
-  // Initial apply (in case there are default values)
-  applyFilters();
-})();
-</script>
-<!--<div aria-hidden="true" id="prodModalOverlay">-->
-<div aria-labelledby="prodModalTitle" aria-modal="true" class="panel" role="dialog">
-<div class="ph">
-<strong id="prodModalTitle">Опис товару</strong>
-<div class="spacer" style="flex:1"></div>
-<button class="btn" id="prodModalClose" type="button">✕</button>
-</div>
-<div class="pb" id="prodModalBody"></div>
-<div class="actions">
-<button class="btn" id="prodModalOk" type="button">Готово</button>
-</div>
-</div>
-</div>
-<script id="desc-modal-script">
-(function(){
-  function openProductModal(p){
-    var overlay = document.getElementById('prodModalOverlay');
-    if(!overlay) return;
-    var body = document.getElementById('prodModalBody');
-    var title = document.getElementById('prodModalTitle');
-    if(title) title.textContent = p?.name || 'Опис товару';
-    var pf = (typeof priceFor==='function') ? priceFor(p) : {UAH:p?.retailUAH||0, USD:p?.retailUSD||0, mode:'retail'};
-    var html = '';
-    html += '<div class="desc-meta">';
-    if(p?.barcode) html += '<span class="badge">ID: '+String(p.barcode)+'</span>';
-    if(p?.type)    html += '<span class="badge">Тип: '+String(p.type)+'</span>';
-    if(p?.color)   html += '<span class="badge">Колір: '+String(p.color)+'</span>';
-    html += '</div>';
-    html += '<div class="desc-prices">';
-    html += '<span class="pill">Поточна ціна: '+ (typeof fmtUAH==='function'? fmtUAH(pf.UAH) : (pf.UAH + ' грн')) +'</span>';
-    html += '<span class="pill">'+ (typeof fmtUSD==='function'? fmtUSD(pf.USD) : ('$'+pf.USD)) +'</span>';
-    if(p?.retailUAH && p?.wholesaleUAH) html += '<span class="pill">Роздріб: '+ (typeof fmtUAH==='function'? fmtUAH(p.retailUAH) : p.retailUAH+' грн') +'</span><span class="pill">Опт: '+ (typeof fmtUAH==='function'? fmtUAH(p.wholesaleUAH) : p.wholesaleUAH+' грн') +'</span>';
-    html += '</div>';
-    var desc = (p && (p.description || p.desc)) ? String(p.description || p.desc) : 'Опис відсутній. Дані вище містять ключові характеристики товару.';
-    html += '<div>'+desc.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>';
-    if(body) body.innerHTML = html;
-    overlay.style.display = 'flex';
-    setTimeout(function(){ overlay.classList.add('open'); }, 10);
-  }
-  function closeProductModal(){
-    var overlay = document.getElementById('prodModalOverlay');
-    if(!overlay) return;
-    overlay.classList.remove('open');
-    setTimeout(function(){ overlay.style.display='none'; }, 150);
-  }
-  window.__openProductModal = openProductModal;
-  window.__closeProductModal = closeProductModal;
-  // Close handlers
-  document.addEventListener('click', function(e){
-    if(e.target && (e.target.id==='prodModalClose' || e.target.id==='prodModalOk')){
-      closeProductModal();
-    }
-    var overlay = document.getElementById('prodModalOverlay');
-    if(overlay && e.target===overlay){ closeProductModal(); }
-  });
-
-  function productFromCard(card){
-    try{
-      var name = card.querySelector('.name')?.textContent?.trim() || '';
-      var barcode = card.querySelector('.barcode')?.textContent?.trim() || '';
-      var p = Array.isArray(window.CATALOG) ? window.CATALOG.find(function(x){
-        return String(x.name||'').trim()===name && String(x.barcode||'').trim()===barcode;
-      }) : null;
-      return p || null;
-    }catch(e){ return null; }
-  }
-
-  function injectDescButtons(scope){
-    var grid = scope || document.querySelector('#grid');
-    if(!grid) return;
-    grid.querySelectorAll('.card').forEach(function(card, idx){
-      var footer = card.querySelector('.footer');
-      var addBtn = card.querySelector('.footer .add');
-      var spacer = card.querySelector('.footer .spacer');
-      if(!footer || !addBtn || !spacer) return;
-      // If already has our button, skip
-      if(footer.querySelector('.btn.ghost.view')) return;
-      var btn = document.createElement('button');
-      btn.className = 'btn ghost view';
-      btn.type = 'button';
-      btn.textContent ="Опис";
-      var prod = productFromCard(card) || (Array.isArray(window.CATALOG) ? window.CATALOG[idx] : null);
-      btn.addEventListener('click', function(ev){
-        ev.stopPropagation();
-        if(window.__openProductModal) window.__openProductModal(prod || {});
-      });
-      // Place to the left of spacer, so "Опис" left, "У кошик" right
-      footer.insertBefore(btn, spacer);
-    });
-  }
-
-  // Patch renderGrid to always inject after render
-  (function(){
-    if(typeof renderGrid === 'function' && !window.__renderGridPatched2){
-      var _renderGrid = renderGrid;
-      window.renderGrid = function(list){
-        var res = _renderGrid.call(this, list);
-        try{ injectDescButtons(); }catch(e){}
-        return res;
-      };
-      window.__renderGridPatched2 = true;
-    }
-  })();
-
-  // Inject ASAP after DOM ready, and also after a short delay to catch initial boot()
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      injectDescButtons();
-      setTimeout(injectDescButtons, 50);
-      setTimeout(injectDescButtons, 250);
-    });
-  }else{
-    injectDescButtons();
-    setTimeout(injectDescButtons, 50);
-    setTimeout(injectDescButtons, 250);
-  }
-
-  // Observe grid for dynamic changes
-  var grid = document.getElementById('grid');
-  if(grid){
-    var mo = new MutationObserver(function(){ injectDescButtons(grid); });
-    mo.observe(grid, {childList:true, subtree:true});
-  }
-})();</script><script id="flip-card-script">
+<script id="flip-card-script">
 (function(){
   function productFromCard(card){
     try{
@@ -1632,42 +1492,42 @@ function updatePaymentAvailability(){
     }
   }
 
-  function ensureDescButton(card){
-    var footer = card.querySelector('.footer');
-    var spacer = footer ? footer.querySelector('.spacer') : null;
-    if(!footer || !spacer) return;
-    var btn = footer.querySelector('.btn.ghost.view');
-    if(!btn){
-      btn = document.createElement('button');
-      btn.className = 'btn ghost view';
-      btn.type = 'button';
-      btn.textContent = 'Опис';
-      footer.insertBefore(btn, spacer);
-    }
-    if(!btn.__flipWired){
-      btn.addEventListener('click', function(ev){
-        ev.stopPropagation();
-        ensureFlipStructure(card);
-        var p = productFromCard(card) || {};
-        fillBack(card, p);
-        // set min-height for smoothness equal to front height
-        var front = card.querySelector('.front');
-        if(front){
-// lock height to front via CSS var (--flip-h)
-var front = card.querySelector('.front');
-var inner = card.querySelector('.flip-inner');
-if (front && inner) {
-  const h = Math.ceil(front.scrollHeight || front.getBoundingClientRect().height);
-  card.style.setProperty('--flip-h', h > 0 ? h + 'px' : 'auto');
-}
-card.classList.add('flipped');
+<!--  function ensureDescButton(card){-->
+<!--    var footer = card.querySelector('.footer');-->
+<!--    var spacer = footer ? footer.querySelector('.spacer') : null;-->
+<!--    if(!footer || !spacer) return;-->
+<!--    var btn = footer.querySelector('.btn.ghost.view');-->
+<!--    if(!btn){-->
+<!--      btn = document.createElement('button');-->
+<!--      btn.className = 'btn ghost view';-->
+<!--      btn.type = 'button';-->
+<!--      btn.textContent = 'Опис';-->
+<!--      footer.insertBefore(btn, spacer);-->
+<!--    }-->
+<!--    if(!btn.__flipWired){-->
+<!--      btn.addEventListener('click', function(ev){-->
+<!--        ev.stopPropagation();-->
+<!--        ensureFlipStructure(card);-->
+<!--        var p = productFromCard(card) || {};-->
+<!--        fillBack(card, p);-->
+<!--        // set min-height for smoothness equal to front height-->
+<!--        var front = card.querySelector('.front');-->
+<!--        if(front){-->
+<!--// lock height to front via CSS var (&#45;&#45;flip-h)-->
+<!--var front = card.querySelector('.front');-->
+<!--var inner = card.querySelector('.flip-inner');-->
+<!--if (front && inner) {-->
+<!--  const h = Math.ceil(front.scrollHeight || front.getBoundingClientRect().height);-->
+<!--  card.style.setProperty('&#45;&#45;flip-h', h > 0 ? h + 'px' : 'auto');-->
+<!--}-->
+<!--card.classList.add('flipped');-->
 
-        }
-        card.classList.add('flipped');
-      });
-      btn.__flipWired = true;
-    }
-  }
+<!--        }-->
+<!--        card.classList.add('flipped');-->
+<!--      });-->
+<!--      btn.__flipWired = true;-->
+<!--    }-->
+<!--  }-->
 
   function enhanceCard(card){
     ensureDescButton(card);
@@ -1703,6 +1563,7 @@ card.classList.add('flipped');
     mo.observe(grid, {childList:true, subtree:true});
   }
 })();</script>
+
 <script id="add-flip-back-btn-script">
 (function(){
   function ensureBackButtons(root){
@@ -1768,9 +1629,7 @@ card.classList.add('flipped');
 })();
 </script>
 
-
-
-    <script>
+<script>
       (function(){
         function addBackButtons(root) {
           if(!root || !root.querySelectorAll) return;
@@ -1820,30 +1679,9 @@ card.classList.add('flipped');
           }
         }, true);
       })();
-    </script>
-    <!-- flip-back-btn-patch -->
+</script>
 
-
-    <!-- global-flip-back-patch -->
-    <style>
-      #global-flip-back {
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        z-index: 99999;
-        padding: 10px 14px;
-        border: none;
-        border-radius: 12px;
-        font-size: 14px;
-        cursor: pointer;
-        background: rgba(0,0,0,0.08);
-        backdrop-filter: blur(2px);
-        display: none;
-      }
-      body.has-flipped #global-flip-back { display: inline-block; }
-    </style>
-    <button id="global-flip-back" type="button">← Назад</button>
-    <script>
+<script>
       (function(){
         var lastFlipped = null;
         function updateState() {
@@ -1898,8 +1736,9 @@ card.classList.add('flipped');
           }
         });
       })();
-    </script>
-    <!-- global-flip-back-patch -->
+
+</script>
+
 <script>
 document.addEventListener('click', function(e){
   // Перевіряємо, чи клік був усередині зворотного боку картки
@@ -1912,8 +1751,10 @@ document.addEventListener('click', function(e){
     }
   }
 }, true);
+
 </script>
 
+<script>
 // === Flip height locker: keeps card height equal to the front side ===
 function lockFlipSize(card){
   // якщо ти використовуєш .front/.back, беремо .front, інакше - саму картку
@@ -1941,7 +1782,7 @@ function lockFlipSize(card){
   // запасний варіант на глобальний ресайз
   window.addEventListener('resize', measure, { passive: true });
 }
-
+</script>
 
 </body>
 </html>
